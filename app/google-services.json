@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "736895268803",
+    "project_id": "erp-97394",
+    "storage_bucket": "erp-97394.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:736895268803:android:51cb7cf817a270321f2f76",
+        "android_client_info": {
+          "package_name": "com.erp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "736895268803-j203q1stu6sj3aj7iqb3lq18feoi2ov6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.erp",
+            "certificate_hash": "8fa261ef9706ee555ea3d154126ceb4b4fb281cb"
+          }
+        },
+        {
+          "client_id": "736895268803-5k8i2c63m5vej42hjhmr9klbqb64mcgp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATpel0U48zMlkZNyFfSCUqGT6OjiB81-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "736895268803-5k8i2c63m5vej42hjhmr9klbqb64mcgp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
