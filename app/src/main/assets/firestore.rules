@@ -1,0 +1,88 @@
+// Firestore Security Rules for ERP system
+// You can upload these rules to Firebase through the console or using Firebase CLI
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Base rules that apply to all collections
+    match /{document=**} {
+      // Default deny all access unless explicitly granted
+      allow read, write: if false;
+    }
+    
+    // Inventory module rules
+    match /products/{productId} {
+      // Allow read access to authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow write access to authenticated users with validation
+      allow create: if request.auth != null && 
+                    validateProductCreate(request.resource.data);
+      
+      allow update: if request.auth != null && 
+                    validateProductUpdate(request.resource.data, resource.data);
+      
+      allow delete: if request.auth != null;
+      
+      // Functions to validate product data
+      function validateProductCreate(product) {
+        return product.size() > 0 &&
+               'name' in product && product.name is string && product.name.size() > 0 &&
+               'sku' in product && product.sku is string && product.sku.size() > 0 &&
+               'price' in product && product.price is number && product.price >= 0 &&
+               'stockQuantity' in product && product.stockQuantity is number && product.stockQuantity >= 0 &&
+               'reorderLevel' in product && product.reorderLevel is number && product.reorderLevel >= 0 &&
+               'createdAt' in product && product.createdAt is timestamp &&
+               'updatedAt' in product && product.updatedAt is timestamp;
+      }
+      
+      function validateProductUpdate(newProduct, oldProduct) {
+        return newProduct.size() > 0 &&
+               'name' in newProduct && newProduct.name is string && newProduct.name.size() > 0 &&
+               'sku' in newProduct && newProduct.sku is string && newProduct.sku.size() > 0 &&
+               'price' in newProduct && newProduct.price is number && newProduct.price >= 0 &&
+               'stockQuantity' in newProduct && newProduct.stockQuantity is number && newProduct.stockQuantity >= 0 &&
+               'reorderLevel' in newProduct && newProduct.reorderLevel is number && newProduct.reorderLevel >= 0 &&
+               'createdAt' in newProduct && newProduct.createdAt is timestamp &&
+               'updatedAt' in newProduct && newProduct.updatedAt is timestamp &&
+               // Ensure created date isn't changed
+               newProduct.createdAt == oldProduct.createdAt;
+      }
+    }
+    
+    match /vendors/{vendorId} {
+      // Allow read access to authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow write access to authenticated users with validation
+      allow create: if request.auth != null && 
+                    validateVendorCreate(request.resource.data);
+      
+      allow update: if request.auth != null && 
+                    validateVendorUpdate(request.resource.data, resource.data);
+      
+      allow delete: if request.auth != null;
+      
+      // Functions to validate vendor data
+      function validateVendorCreate(vendor) {
+        return vendor.size() > 0 &&
+               'name' in vendor && vendor.name is string && vendor.name.size() > 0 &&
+               'email' in vendor && vendor.email is string &&
+               'status' in vendor && vendor.status is string &&
+               'createdAt' in vendor && vendor.createdAt is timestamp &&
+               'updatedAt' in vendor && vendor.updatedAt is timestamp;
+      }
+      
+      function validateVendorUpdate(newVendor, oldVendor) {
+        return newVendor.size() > 0 &&
+               'name' in newVendor && newVendor.name is string && newVendor.name.size() > 0 &&
+               'email' in newVendor && newVendor.email is string &&
+               'status' in newVendor && newVendor.status is string &&
+               'createdAt' in newVendor && newVendor.createdAt is timestamp &&
+               'updatedAt' in newVendor && newVendor.updatedAt is timestamp &&
+               // Ensure created date isn't changed
+               newVendor.createdAt == oldVendor.createdAt;
+      }
+    }
+  }
+} 

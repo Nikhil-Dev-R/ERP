@@ -1,7 +1,9 @@
 package com.erp.modules.finance.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,18 +11,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,17 +39,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.erp.common.util.CurrencyFormatter
 import com.erp.modules.finance.data.model.Invoice
 import com.erp.modules.finance.data.model.InvoiceStatus
 import com.erp.modules.finance.data.model.Transaction
 import com.erp.modules.finance.data.model.TransactionType
 import com.erp.modules.finance.ui.viewmodel.FinanceViewModel
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
-import java.util.Currency
 import java.util.Locale
 
 @Composable
@@ -48,7 +57,11 @@ fun FinanceDashboardScreen(
     viewModel: FinanceViewModel,
     onNavigateToTransactions: () -> Unit,
     onNavigateToInvoices: () -> Unit,
-    onAddTransaction: () -> Unit
+    onAddTransaction: () -> Unit,
+    onNavigateToFees: () -> Unit,
+    onNavigateToReports: () -> Unit,
+    onNavigateToBudgets: () -> Unit,
+    onNavigateBack: () -> Boolean
 ) {
     val transactions by viewModel.transactions.collectAsState()
     val invoices by viewModel.invoices.collectAsState()
@@ -81,6 +94,66 @@ fun FinanceDashboardScreen(
             
             item {
                 FinancialSummaryCard(transactions, invoices)
+            }
+            
+            // Quick Access Menu
+            item {
+                Text(
+                    text = "Finance Management",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // Transactions
+                    QuickAccessButton(
+                        text = "Transactions",
+                        icon = Icons.Default.SwapHoriz,
+                        onClick = onNavigateToTransactions
+                    )
+                    
+                    // Invoices
+                    QuickAccessButton(
+                        text = "Invoices",
+                        icon = Icons.Default.Receipt,
+                        onClick = onNavigateToInvoices
+                    )
+                    
+                    // Fees
+                    QuickAccessButton(
+                        text = "Fees",
+                        icon = Icons.Default.School,
+                        onClick = onNavigateToFees
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // Reports
+                    QuickAccessButton(
+                        text = "Reports",
+                        icon = Icons.Default.BarChart,
+                        onClick = onNavigateToReports
+                    )
+                    
+                    // Budgets
+                    QuickAccessButton(
+                        text = "Budgets",
+                        icon = Icons.Default.AccountBalance,
+                        onClick = onNavigateToBudgets
+                    )
+                    
+                    // Spacer for 3-column alignment
+                    Box(modifier = Modifier.width(100.dp))
+                }
             }
             
             item {
@@ -163,9 +236,6 @@ fun FinanceDashboardScreen(
 
 @Composable
 fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice>) {
-    val numberFormat = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
-    numberFormat.currency = Currency.getInstance("INR")
-    
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -210,7 +280,7 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = numberFormat.format(income),
+                            text = CurrencyFormatter.formatAsRupees(income),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -230,7 +300,7 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = numberFormat.format(expenses),
+                            text = CurrencyFormatter.formatAsRupees(expenses),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
@@ -239,7 +309,7 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
             }
             
             Spacer(modifier = Modifier.height(16.dp))
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.height(16.dp))
             
             Row(
@@ -252,7 +322,7 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
                     style = MaterialTheme.typography.titleSmall
                 )
                 Text(
-                    text = numberFormat.format(balance),
+                    text = CurrencyFormatter.formatAsRupees(balance),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = if (balance >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
@@ -275,7 +345,7 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = numberFormat.format(pendingInvoices),
+                    text = CurrencyFormatter.formatAsRupees(pendingInvoices),
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -286,8 +356,6 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
 @Composable
 fun TransactionItem(transaction: Transaction) {
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    val numberFormat = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
-    numberFormat.currency = Currency.getInstance("INR")
     
     ElevatedCard(
         modifier = Modifier
@@ -316,7 +384,7 @@ fun TransactionItem(transaction: Transaction) {
             }
             
             Text(
-                text = numberFormat.format(transaction.amount),
+                text = CurrencyFormatter.formatAsRupees(transaction.amount),
                 style = MaterialTheme.typography.bodyLarge,
                 color = when (transaction.type) {
                     TransactionType.INCOME -> MaterialTheme.colorScheme.primary
@@ -331,8 +399,6 @@ fun TransactionItem(transaction: Transaction) {
 @Composable
 fun InvoiceItem(invoice: Invoice) {
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    val numberFormat = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
-    numberFormat.currency = Currency.getInstance("INR")
     
     ElevatedCard(
         modifier = Modifier
@@ -361,10 +427,51 @@ fun InvoiceItem(invoice: Invoice) {
             }
             
             Text(
-                text = numberFormat.format(invoice.amount),
+                text = CurrencyFormatter.formatAsRupees(invoice.amount),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@Composable
+fun QuickAccessButton(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(100.dp)
+            .clickable(onClick = onClick)
+            .padding(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = text,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
+        )
     }
 } 

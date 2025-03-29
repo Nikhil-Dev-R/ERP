@@ -23,13 +23,14 @@ enum class InvoiceStatus {
 data class Invoice(
     val invoiceNumber: String,
     val customerId: String,
+    val customerName: String = "",
     val issueDate: Date,
     val dueDate: Date,
     val amount: BigDecimal,
     val tax: BigDecimal = BigDecimal.ZERO,
     val status: InvoiceStatus,
     val notes: String? = null,
-    val items: List<InvoiceItem> = emptyList(),
+    val items: List<InvoiceItem>? = null,
     override var createdAt: Date = Date(),
     override var updatedAt: Date = Date(),
     @PrimaryKey
@@ -37,11 +38,11 @@ data class Invoice(
 ) : BaseEntity()
 
 data class InvoiceItem(
-    val productId: String,
+    val id: String = UUID.randomUUID().toString(),
+    val productId: String? = null,
     val description: String,
     val quantity: Int,
     val unitPrice: BigDecimal,
     val discount: BigDecimal = BigDecimal.ZERO,
-    val tax: BigDecimal = BigDecimal.ZERO,
-    val total: BigDecimal
+    val tax: BigDecimal = BigDecimal.ZERO
 ) 

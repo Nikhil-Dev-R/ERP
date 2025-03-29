@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
+import androidx.core.content.edit
 
 class AuthManager(private val context: Context) {
     private val auth = FirebaseAuth.getInstance()
@@ -36,7 +37,7 @@ class AuthManager(private val context: Context) {
             // Only update SharedPreferences if Firebase auth state changes
             if (firebaseLoggedIn != _isLoggedIn.value && firebaseLoggedIn) {
                 Log.d("AuthManager", "Firebase auth state changed, updating prefs: $firebaseLoggedIn")
-                prefs.edit().putBoolean(KEY_IS_LOGGED_IN, firebaseLoggedIn).apply()
+                prefs.edit() { putBoolean(KEY_IS_LOGGED_IN, firebaseLoggedIn) }
                 _isLoggedIn.value = firebaseLoggedIn
             }
         }
@@ -49,9 +50,9 @@ class AuthManager(private val context: Context) {
             
             // Store login state in SharedPreferences
             val prefs = context.getSharedPreferences(AUTH_PREFS, Context.MODE_PRIVATE)
-            prefs.edit()
-                .putBoolean(KEY_IS_LOGGED_IN, true)
-                .apply()
+            prefs.edit {
+                putBoolean(KEY_IS_LOGGED_IN, true)
+            }
             
             _isLoggedIn.value = true
             Log.d("AuthManager", "Sign in successful, updated login state")
@@ -68,9 +69,9 @@ class AuthManager(private val context: Context) {
         Log.d("AuthManager", "Simulating sign in")
         
         val prefs = context.getSharedPreferences(AUTH_PREFS, Context.MODE_PRIVATE)
-        prefs.edit()
-            .putBoolean(KEY_IS_LOGGED_IN, true)
-            .apply()
+        prefs.edit {
+            putBoolean(KEY_IS_LOGGED_IN, true)
+        }
         
         _isLoggedIn.value = true
         Log.d("AuthManager", "Simulated sign in complete, login state: ${_isLoggedIn.value}")
@@ -83,9 +84,9 @@ class AuthManager(private val context: Context) {
         
         // Clear SharedPreferences
         val prefs = context.getSharedPreferences(AUTH_PREFS, Context.MODE_PRIVATE)
-        prefs.edit()
-            .putBoolean(KEY_IS_LOGGED_IN, false)
-            .apply()
+        prefs.edit {
+            putBoolean(KEY_IS_LOGGED_IN, false)
+        }
         
         _isLoggedIn.value = false
         Log.d("AuthManager", "Sign out complete")

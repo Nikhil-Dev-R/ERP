@@ -8,8 +8,16 @@ import com.erp.common.model.BaseEntity
 import kotlinx.coroutines.flow.Flow
 
 interface BaseDao<T : BaseEntity> {
+    /**
+     * Get all entities
+     * Note: Implementing DAOs must override this method with proper @Query annotation
+     */
     fun getAll(): Flow<List<T>>
 
+    /**
+     * Get entity by ID
+     * Note: Implementing DAOs must override this method with proper @Query annotation
+     */
     suspend fun getById(id: String): T?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

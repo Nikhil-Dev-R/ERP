@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.erp" />
-                  <option name="mobileSdkAppId" value="1:736895268803:android:51cb7cf817a270321f2f76" />
-                  <option name="projectId" value="erp-97394" />
-                  <option name="projectNumber" value="736895268803" />
+                  <option name="mobileSdkAppId" value="1:900250607954:android:b2c4ad14ae61fd4d055a8b" />
+                  <option name="projectId" value="erp-software-75e0a" />
+                  <option name="projectNumber" value="900250607954" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

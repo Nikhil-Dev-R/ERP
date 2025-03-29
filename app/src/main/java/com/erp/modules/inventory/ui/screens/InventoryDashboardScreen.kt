@@ -12,40 +12,49 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Warehouse
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.erp.modules.inventory.data.model.Product
-import com.erp.modules.inventory.data.model.ProductStatus
 import com.erp.modules.inventory.data.model.Vendor
 import com.erp.modules.inventory.ui.viewmodel.InventoryViewModel
 import java.text.NumberFormat
 import java.util.Currency
 import java.util.Locale
+
+val LocalInventoryViewModel = compositionLocalOf<InventoryViewModel> { error("No ViewModel provided") }
 
 @Composable
 fun InventoryDashboardScreen(
@@ -53,7 +62,8 @@ fun InventoryDashboardScreen(
     onNavigateToProducts: () -> Unit,
     onNavigateToVendors: () -> Unit,
     onAddProduct: () -> Unit,
-    onAddVendor: () -> Unit
+    onAddVendor: () -> Unit,
+    onNavigateBack: () -> Boolean
 ) {
     val products by viewModel.products.collectAsState()
     val lowStockProducts by viewModel.lowStockProducts.collectAsState()
@@ -61,55 +71,57 @@ fun InventoryDashboardScreen(
     
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = if (selectedTabIndex == 0) onAddProduct else onAddVendor
-            ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = if (selectedTabIndex == 0) "Add Product" else "Add Vendor")
+    CompositionLocalProvider(LocalInventoryViewModel provides viewModel) {
+        Scaffold(
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = if (selectedTabIndex == 0) onAddProduct else onAddVendor
+                ) {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = if (selectedTabIndex == 0) "Add Product" else "Add Vendor")
+                }
             }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            Text(
-                text = "Inventory Management",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+        ) { padding ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                textAlign = TextAlign.Center
-            )
-            
-            TabRow(selectedTabIndex = selectedTabIndex) {
-                Tab(
-                    selected = selectedTabIndex == 0,
-                    onClick = { selectedTabIndex = 0 },
-                    text = { Text("Products") },
-                    icon = { Icon(Icons.Default.Warehouse, contentDescription = null) }
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                Text(
+                    text = "Inventory Management",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center
                 )
-                Tab(
-                    selected = selectedTabIndex == 1,
-                    onClick = { selectedTabIndex = 1 },
-                    text = { Text("Vendors") },
-                    icon = { Icon(Icons.Default.Business, contentDescription = null) }
-                )
-            }
-            
-            when (selectedTabIndex) {
-                0 -> ProductsTab(
-                    products = products,
-                    lowStockProducts = lowStockProducts,
-                    onViewAllProducts = onNavigateToProducts
-                )
-                1 -> VendorsTab(
-                    vendors = vendors,
-                    onViewAllVendors = onNavigateToVendors
-                )
+                
+                TabRow(selectedTabIndex = selectedTabIndex) {
+                    Tab(
+                        selected = selectedTabIndex == 0,
+                        onClick = { selectedTabIndex = 0 },
+                        text = { Text("Products") },
+                        icon = { Icon(Icons.Default.Warehouse, contentDescription = null) }
+                    )
+                    Tab(
+                        selected = selectedTabIndex == 1,
+                        onClick = { selectedTabIndex = 1 },
+                        text = { Text("Vendors") },
+                        icon = { Icon(Icons.Default.Business, contentDescription = null) }
+                    )
+                }
+                
+                when (selectedTabIndex) {
+                    0 -> ProductsTab(
+                        products = products,
+                        lowStockProducts = lowStockProducts,
+                        onViewAllProducts = onNavigateToProducts
+                    )
+                    1 -> VendorsTab(
+                        vendors = vendors,
+                        onViewAllVendors = onNavigateToVendors
+                    )
+                }
             }
         }
     }
@@ -121,11 +133,14 @@ fun ProductsTab(
     lowStockProducts: List<Product>,
     onViewAllProducts: () -> Unit
 ) {
+    var showRestockDialog by remember { mutableStateOf(false) }
+    var selectedProduct by remember { mutableStateOf<Product?>(null) }
+    val viewModel = LocalInventoryViewModel.current
+
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .fillMaxWidth()
+            .padding(16.dp)
     ) {
         item {
             InventorySummaryCard(products, lowStockProducts)
@@ -142,8 +157,14 @@ fun ProductsTab(
                 )
             }
             
-            items(lowStockProducts.take(5)) { product ->
-                ProductItem(product)
+            items(lowStockProducts.take(3)) { product ->
+                ProductItem(
+                    product = product,
+                    onRestock = {
+                        selectedProduct = it
+                        showRestockDialog = true
+                    }
+                )
             }
         }
         
@@ -180,6 +201,17 @@ fun ProductsTab(
             
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+    
+    if (showRestockDialog) {
+        RestockDialog(
+            product = selectedProduct,
+            onDismiss = { showRestockDialog = false },
+            onRestock = { productId, quantity ->
+                viewModel.increaseProductStock(productId, quantity)
+                showRestockDialog = false
+            }
+        )
     }
 }
 
@@ -316,7 +348,7 @@ fun InventorySummaryCard(products: List<Product>, lowStockProducts: List<Product
             }
             
             Spacer(modifier = Modifier.height(16.dp))
-            Divider()
+            HorizontalDivider()
             Spacer(modifier = Modifier.height(16.dp))
             
             Row(
@@ -431,7 +463,10 @@ fun VendorSummaryCard(vendors: List<Vendor>) {
 }
 
 @Composable
-fun ProductItem(product: Product) {
+fun ProductItem(
+    product: Product,
+    onRestock: (Product) -> Unit = {}
+) {
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
     currencyFormat.currency = Currency.getInstance("INR")
     
@@ -441,44 +476,62 @@ fun ProductItem(product: Product) {
             .padding(vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = product.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "SKU: ${product.sku}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline
-                )
-            }
-            
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = currencyFormat.format(product.price),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                val stockColor = when {
-                    product.stockQuantity <= 0 -> MaterialTheme.colorScheme.error
-                    product.stockQuantity <= product.reorderLevel -> MaterialTheme.colorScheme.error
-                    else -> MaterialTheme.colorScheme.primary
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = product.name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "SKU: ${product.sku}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline
+                    )
                 }
                 
-                Text(
-                    text = "Stock: ${product.stockQuantity}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = stockColor
-                )
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = currencyFormat.format(product.price),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    val stockColor = when {
+                        product.stockQuantity <= 0 -> MaterialTheme.colorScheme.error
+                        product.stockQuantity <= product.reorderLevel -> MaterialTheme.colorScheme.error
+                        else -> MaterialTheme.colorScheme.primary
+                    }
+                    
+                    Text(
+                        text = "Stock: ${product.stockQuantity}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = stockColor
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = { onRestock(product) }
+                ) {
+                    Text("Restock")
+                }
             }
         }
     }
@@ -530,4 +583,89 @@ fun VendorItem(vendor: Vendor) {
             )
         }
     }
-} 
+}
+
+@Composable
+fun RestockDialog(
+    product: Product?,
+    onDismiss: () -> Unit,
+    onRestock: (String, Int) -> Unit
+) {
+    var quantity by remember { mutableStateOf("") }
+    var quantityError by remember { mutableStateOf("") }
+    
+    fun validateInput(): Boolean {
+        var isValid = true
+        
+        if (quantity.isBlank()) {
+            quantityError = "Quantity is required"
+            isValid = false
+        } else {
+            val qty = quantity.toIntOrNull()
+            if (qty == null || qty <= 0) {
+                quantityError = "Please enter a valid quantity"
+                isValid = false
+            } else {
+                quantityError = ""
+            }
+        }
+        
+        return isValid
+    }
+    
+    if (product == null) {
+        onDismiss()
+        return
+    }
+    
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Restock Product") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Product: ${product.name}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Text(
+                    text = "Current Stock: ${product.stockQuantity}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                androidx.compose.material3.OutlinedTextField(
+                    value = quantity,
+                    onValueChange = { quantity = it },
+                    label = { Text("Add Quantity") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    isError = quantityError.isNotEmpty(),
+                    supportingText = { if (quantityError.isNotEmpty()) Text(quantityError) }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (validateInput()) {
+                        onRestock(product.id, quantity.toInt())
+                    }
+                }
+            ) {
+                Text("Add Stock")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}

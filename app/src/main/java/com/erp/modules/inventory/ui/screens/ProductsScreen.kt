@@ -10,22 +10,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,11 +62,13 @@ import java.util.Locale
 fun ProductsScreen(
     viewModel: InventoryViewModel,
     onNavigateBack: () -> Unit,
+    onNavigateToProductDetail: Function<Unit>,
 ) {
     val products by viewModel.products.collectAsState()
     val selectedProduct by viewModel.selectedProduct.collectAsState()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
+    var showRestockDialog by remember { mutableStateOf(false) }
     var showFilterMenu by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var displayedProducts by remember(products, searchQuery) { 
@@ -89,7 +88,7 @@ fun ProductsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -195,6 +194,10 @@ fun ProductsScreen(
                             onProductClick = {
                                 viewModel.selectProduct(it)
                                 showEditDialog = true
+                            },
+                            onRestock = {
+                                viewModel.selectProduct(it)
+                                showRestockDialog = true
                             }
                         )
                     }
@@ -209,6 +212,17 @@ fun ProductsScreen(
                 onSave = { product ->
                     viewModel.saveProduct(product)
                     showEditDialog = false
+                }
+            )
+        }
+        
+        if (showRestockDialog) {
+            com.erp.modules.inventory.ui.screens.RestockDialog(
+                product = selectedProduct,
+                onDismiss = { showRestockDialog = false },
+                onRestock = { productId, quantity ->
+                    viewModel.increaseProductStock(productId, quantity)
+                    showRestockDialog = false
                 }
             )
         }
@@ -241,7 +255,8 @@ fun ProductsScreen(
 @Composable
 fun ProductItem(
     product: Product,
-    onProductClick: (Product) -> Unit
+    onProductClick: (Product) -> Unit,
+    onRestock: (Product) -> Unit
 ) {
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
     currencyFormat.currency = Currency.getInstance("INR")
@@ -255,8 +270,7 @@ fun ProductItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .clickable { onProductClick(product) },
+            .padding(vertical = 4.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -265,7 +279,9 @@ fun ProductItem(
                 .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onProductClick(product) },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -327,6 +343,20 @@ fun ProductItem(
                         style = MaterialTheme.typography.bodySmall,
                         color = statusColor
                     )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = { onRestock(product) },
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    Text("Restock")
                 }
             }
         }
