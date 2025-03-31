@@ -201,8 +201,8 @@ fun ERPNavHost(
         // Finance module navigation
         composable(ERPDestinations.FINANCE_DASHBOARD_ROUTE) {
             FinanceDashboardScreen(
-                observeUiState = viewModel.financeViewModel.financeUiState,
 //                viewModel = viewModel.financeViewModel,
+                observeUiState = viewModel.financeViewModel.financeUiState,
                 onNavigateToTransactions = {
                     navController.navigate(ERPDestinations.TRANSACTIONS_ROUTE)
                 },

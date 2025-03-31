@@ -19,8 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.School
@@ -35,7 +35,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,7 +52,6 @@ import com.erp.modules.finance.data.model.TransactionType
 import com.erp.modules.finance.ui.viewmodel.FeeDetailState
 import com.erp.modules.finance.ui.viewmodel.FeesUiState
 import com.erp.modules.finance.ui.viewmodel.FinanceUiState
-import com.erp.modules.finance.ui.viewmodel.FinanceViewModel
 import com.erp.modules.finance.ui.viewmodel.InvoiceDetailState
 import com.erp.modules.finance.ui.viewmodel.InvoicesUiState
 import com.erp.modules.finance.ui.viewmodel.TransactionDetailState
@@ -107,9 +105,10 @@ fun FinanceDashboardScreen(
             }
             
             item {
-                if (transactions != null && invoices != null) {
-                    FinancialSummaryCard(transactions, invoices)
-                }
+                FinancialSummaryCard(
+                    transactions = transactions ?: emptyList(),
+                    invoices = invoices ?: emptyList()
+                )
             }
             
             // Quick Access Menu
@@ -500,6 +499,11 @@ fun QuickAccessButton(
 @Composable
 fun FinanceDashboardScreenPreview() {
     FinanceDashboardScreen(
+//        viewModel = FinanceViewModel(
+//            transactionRepository = TransactionRepository,
+//            invoiceRepository = InvoiceRepository,
+//            feeRepository = FeeRepository
+//        ),
         observeUiState = MutableStateFlow(
             FinanceUiState(
                 transactionsState = TransactionsUiState.Loading,
@@ -517,5 +521,6 @@ fun FinanceDashboardScreenPreview() {
         onNavigateToReports = {},
         onNavigateToBudgets = { },
         onNavigateBack = {},
+//        viewModel = TODO(),
     )
 }

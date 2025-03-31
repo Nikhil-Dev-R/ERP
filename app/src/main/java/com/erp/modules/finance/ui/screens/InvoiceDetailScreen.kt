@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -59,6 +60,7 @@ import com.erp.common.util.CurrencyFormatter
 import com.erp.modules.finance.data.model.Invoice
 import com.erp.modules.finance.data.model.InvoiceItem
 import com.erp.modules.finance.data.model.InvoiceStatus
+import com.erp.modules.finance.data.model.TransactionType
 import com.erp.modules.finance.ui.viewmodel.FinanceViewModel
 import com.erp.modules.finance.ui.viewmodel.InvoiceDetailState
 import java.math.BigDecimal
@@ -86,15 +88,15 @@ fun InvoiceDetailScreen(
     var dueDate by remember { mutableStateOf(Date()) }
     var status by remember { mutableStateOf(InvoiceStatus.DRAFT) }
     var notes by remember { mutableStateOf("") }
-    
+
     val invoiceItems = remember { mutableStateListOf<InvoiceItem>() }
-    
+
     var showIssueDatePicker by remember { mutableStateOf(false) }
     var showDueDatePicker by remember { mutableStateOf(false) }
     var isStatusExpanded by remember { mutableStateOf(false) }
-    
+
     val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-    
+
     // Load existing invoice if editing
     LaunchedEffect(key1 = invoiceId) {
         if (invoiceId != null) {
@@ -103,7 +105,7 @@ fun InvoiceDetailScreen(
             viewModel.createNewInvoice()
         }
     }
-    
+
     // Update form with current invoice data
     LaunchedEffect(key1 = currentInvoice) {
         currentInvoice?.let { invoice ->
@@ -114,12 +116,13 @@ fun InvoiceDetailScreen(
             dueDate = invoice.dueDate
             status = invoice.status
             notes = invoice.notes ?: ""
-            
             invoiceItems.clear()
-            invoice.items?.let { invoiceItems.addAll(it) }
+            invoice.items?.let { items ->
+                invoiceItems.addAll(items)
+            }
         }
     }
-    
+
     // Generate a default invoice number for new invoices
     LaunchedEffect(key1 = invoiceId, key2 = invoiceNumber) {
         if (invoiceId == null && invoiceNumber.isEmpty()) {
@@ -131,7 +134,7 @@ fun InvoiceDetailScreen(
             invoiceNumber = "INV-$year$month$day-$random"
         }
     }
-    
+
     // Calculate the total amount based on invoice items
     fun calculateTotalAmount(): BigDecimal {
         return if (invoiceItems.isNotEmpty()) {
@@ -146,18 +149,14 @@ fun InvoiceDetailScreen(
             }
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
-                    Text(
-                        text = if (invoiceId == null) "New Invoice" else "Edit Invoice"
-                    )
-                },
+                title = { Text(if (invoiceId == null) "New Invoice" else "Edit Invoice") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -176,7 +175,7 @@ fun InvoiceDetailScreen(
                         )
                     }
                 }
-                
+
                 is InvoiceDetailState.Error -> {
                     val errorState = invoiceDetailState as InvoiceDetailState.Error
                     Text(
@@ -187,7 +186,7 @@ fun InvoiceDetailScreen(
                             .padding(16.dp)
                     )
                 }
-                
+
                 else -> {
                     // Form content
                     Column(
@@ -202,7 +201,7 @@ fun InvoiceDetailScreen(
                             value = invoiceNumber,
                             onValueChange = { invoiceNumber = it },
                             label = { Text("Invoice Number") },
-                            leadingIcon = { 
+                            leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Numbers,
                                     contentDescription = null
@@ -211,13 +210,13 @@ fun InvoiceDetailScreen(
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        
+
                         // Customer name field
                         OutlinedTextField(
                             value = customerName,
                             onValueChange = { customerName = it },
                             label = { Text("Customer Name") },
-                            leadingIcon = { 
+                            leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = null
@@ -226,14 +225,14 @@ fun InvoiceDetailScreen(
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        
+
                         // Issue date field
                         OutlinedTextField(
                             value = dateFormat.format(issueDate),
                             onValueChange = { },
                             readOnly = true,
                             label = { Text("Issue Date") },
-                            leadingIcon = { 
+                            leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.CalendarMonth,
                                     contentDescription = null
@@ -243,14 +242,14 @@ fun InvoiceDetailScreen(
                                 .fillMaxWidth()
                                 .clickable { showIssueDatePicker = true }
                         )
-                        
+
                         // Due date field
                         OutlinedTextField(
                             value = dateFormat.format(dueDate),
                             onValueChange = { },
                             readOnly = true,
                             label = { Text("Due Date") },
-                            leadingIcon = { 
+                            leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.CalendarMonth,
                                     contentDescription = null
@@ -260,7 +259,7 @@ fun InvoiceDetailScreen(
                                 .fillMaxWidth()
                                 .clickable { showDueDatePicker = true }
                         )
-                        
+
                         // Status selection
                         ExposedDropdownMenuBox(
                             expanded = isStatusExpanded,
@@ -282,7 +281,7 @@ fun InvoiceDetailScreen(
                                     .fillMaxWidth()
                                     .menuAnchor()
                             )
-                            
+
                             ExposedDropdownMenu(
                                 expanded = isStatusExpanded,
                                 onDismissRequest = { isStatusExpanded = false }
@@ -298,7 +297,7 @@ fun InvoiceDetailScreen(
                                 }
                             }
                         }
-                        
+
                         // Invoice Items
                         Text(
                             text = "Invoice Items",
@@ -306,7 +305,7 @@ fun InvoiceDetailScreen(
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 8.dp)
                         )
-                        
+
                         if (invoiceItems.isEmpty()) {
                             ElevatedCard(
                                 modifier = Modifier.fillMaxWidth(),
@@ -323,19 +322,19 @@ fun InvoiceDetailScreen(
                                         text = "No items added yet",
                                         style = MaterialTheme.typography.bodyMedium
                                     )
-                                    
+
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    
+
                                     // Manual amount input if no items
                                     OutlinedTextField(
                                         value = amount,
-                                        onValueChange = { 
+                                        onValueChange = {
                                             if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
                                                 amount = it
                                             }
                                         },
                                         label = { Text("Invoice Amount (₹)") },
-                                        leadingIcon = { 
+                                        leadingIcon = {
                                             Icon(
                                                 imageVector = Icons.Default.MonetizationOn,
                                                 contentDescription = null
@@ -353,10 +352,10 @@ fun InvoiceDetailScreen(
                                     item = item,
                                     onDelete = { invoiceItems.removeAt(index) }
                                 )
-                                
+
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
-                            
+
                             // Total amount
                             ElevatedCard(
                                 modifier = Modifier.fillMaxWidth(),
@@ -374,7 +373,7 @@ fun InvoiceDetailScreen(
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold
                                     )
-                                    
+
                                     Text(
                                         text = CurrencyFormatter.formatAsRupees(calculateTotalAmount()),
                                         style = MaterialTheme.typography.titleMedium,
@@ -383,7 +382,7 @@ fun InvoiceDetailScreen(
                                 }
                             }
                         }
-                        
+
                         // Add Item Button
                         Button(
                             onClick = {
@@ -404,7 +403,7 @@ fun InvoiceDetailScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Add Item")
                         }
-                        
+
                         // Notes field
                         OutlinedTextField(
                             value = notes,
@@ -414,9 +413,9 @@ fun InvoiceDetailScreen(
                                 .fillMaxWidth()
                                 .height(120.dp)
                         )
-                        
+
                         Spacer(modifier = Modifier.height(16.dp))
-                        
+
                         // Save button
                         Button(
                             onClick = {
@@ -429,7 +428,7 @@ fun InvoiceDetailScreen(
                                         BigDecimal.ZERO
                                     }
                                 }
-                                
+
                                 val invoice = Invoice(
                                     id = currentInvoice?.id ?: UUID.randomUUID().toString(),
                                     invoiceNumber = invoiceNumber,
@@ -442,26 +441,26 @@ fun InvoiceDetailScreen(
                                     notes = notes.ifEmpty { null },
                                     items = if (invoiceItems.isNotEmpty()) invoiceItems.toList() else null
                                 )
-                                
+
                                 viewModel.saveInvoice(invoice)
                                 onNavigateBack()
                             },
-                            enabled = invoiceNumber.isNotEmpty() && customerName.isNotEmpty() && 
+                            enabled = invoiceNumber.isNotEmpty() && customerName.isNotEmpty() &&
                                     (amount.isNotEmpty() || invoiceItems.isNotEmpty()),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Save Invoice")
                         }
-                        
+
                         Spacer(modifier = Modifier.height(32.dp))
                     }
-                    
+
                     // Issue Date picker
                     if (showIssueDatePicker) {
                         val datePickerState = rememberDatePickerState(
                             initialSelectedDateMillis = issueDate.time
                         )
-                        
+
                         DatePickerDialog(
                             onDismissRequest = { showIssueDatePicker = false },
                             confirmButton = {
@@ -487,13 +486,13 @@ fun InvoiceDetailScreen(
                             DatePicker(state = datePickerState)
                         }
                     }
-                    
+
                     // Due Date picker
                     if (showDueDatePicker) {
                         val datePickerState = rememberDatePickerState(
                             initialSelectedDateMillis = dueDate.time
                         )
-                        
+
                         DatePickerDialog(
                             onDismissRequest = { showDueDatePicker = false },
                             confirmButton = {
@@ -533,13 +532,13 @@ fun InvoiceItemCard(
     var description by remember { mutableStateOf(item.description) }
     var quantity by remember { mutableStateOf(item.quantity.toString()) }
     var unitPrice by remember { mutableStateOf(item.unitPrice.toString()) }
-    
+
     // Make sure to update the item object when these values change
     LaunchedEffect(description, quantity, unitPrice) {
         // This will update the item passed in without direct reassignment
         // The parent component should handle applying these changes
     }
-    
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -559,7 +558,7 @@ fun InvoiceItemCard(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
-                
+
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -568,28 +567,28 @@ fun InvoiceItemCard(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             OutlinedTextField(
                 value = description,
-                onValueChange = { 
+                onValueChange = {
                     description = it
                 },
                 label = { Text("Description") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
                     value = quantity,
-                    onValueChange = { 
+                    onValueChange = {
                         if (it.isEmpty() || it.matches(Regex("^\\d+$"))) {
                             quantity = it
                         }
@@ -599,10 +598,10 @@ fun InvoiceItemCard(
                     singleLine = true,
                     modifier = Modifier.weight(0.5f)
                 )
-                
+
                 OutlinedTextField(
                     value = unitPrice,
-                    onValueChange = { 
+                    onValueChange = {
                         if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*$"))) {
                             unitPrice = it
                         }
@@ -613,9 +612,9 @@ fun InvoiceItemCard(
                     modifier = Modifier.weight(0.5f)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -625,7 +624,7 @@ fun InvoiceItemCard(
                     text = "Subtotal: ",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                
+
                 Text(
                     text = CurrencyFormatter.formatAsRupees(
                         item.unitPrice.multiply(BigDecimal(item.quantity))
@@ -636,4 +635,4 @@ fun InvoiceItemCard(
             }
         }
     }
-} 
+}
