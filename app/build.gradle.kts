@@ -66,6 +66,7 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.firebase.firestore)
     ksp(libs.androidx.room.compiler)
     
     // Gson for JSON conversion

@@ -42,30 +42,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.erp.common.util.CurrencyFormatter
 import com.erp.modules.finance.data.model.Invoice
 import com.erp.modules.finance.data.model.InvoiceStatus
 import com.erp.modules.finance.data.model.Transaction
 import com.erp.modules.finance.data.model.TransactionType
+import com.erp.modules.finance.ui.viewmodel.FeeDetailState
+import com.erp.modules.finance.ui.viewmodel.FeesUiState
+import com.erp.modules.finance.ui.viewmodel.FinanceUiState
 import com.erp.modules.finance.ui.viewmodel.FinanceViewModel
+import com.erp.modules.finance.ui.viewmodel.InvoiceDetailState
+import com.erp.modules.finance.ui.viewmodel.InvoicesUiState
+import com.erp.modules.finance.ui.viewmodel.TransactionDetailState
+import com.erp.modules.finance.ui.viewmodel.TransactionsUiState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
 fun FinanceDashboardScreen(
-    viewModel: FinanceViewModel,
+//    viewModel: FinanceViewModel,
+    observeUiState: StateFlow<FinanceUiState?>,
     onNavigateToTransactions: () -> Unit,
     onNavigateToInvoices: () -> Unit,
     onAddTransaction: () -> Unit,
     onNavigateToFees: () -> Unit,
     onNavigateToReports: () -> Unit,
     onNavigateToBudgets: () -> Unit,
-    onNavigateBack: () -> Boolean
+    onNavigateBack: () -> Unit
 ) {
-    val transactions by viewModel.transactions.collectAsState()
-    val invoices by viewModel.invoices.collectAsState()
-    val overdueInvoices by viewModel.overdueInvoices.collectAsState()
+    val uiState by observeUiState.collectAsStateWithLifecycle()
+    val transactions = uiState?.transactions
+    val invoices = uiState?.invoices
+    val overdueInvoices = uiState?.overdueInvoices
     
     Scaffold(
         floatingActionButton = {
@@ -93,7 +107,9 @@ fun FinanceDashboardScreen(
             }
             
             item {
-                FinancialSummaryCard(transactions, invoices)
+                if (transactions != null && invoices != null) {
+                    FinancialSummaryCard(transactions, invoices)
+                }
             }
             
             // Quick Access Menu
@@ -165,9 +181,11 @@ fun FinanceDashboardScreen(
                 )
             }
             
-            val recentTransactions = transactions.sortedByDescending { it.date }.take(5)
-            items(recentTransactions) { transaction ->
-                TransactionItem(transaction)
+            val recentTransactions = transactions?.sortedByDescending { it.date }?.take(5)
+            recentTransactions?.let {
+                items(it) { transaction ->
+                    TransactionItem(transaction)
+                }
             }
             
             item {
@@ -196,18 +214,20 @@ fun FinanceDashboardScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-            
-            if (overdueInvoices.isEmpty()) {
-                item {
-                    Text(
-                        text = "No overdue invoices",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-            } else {
-                items(overdueInvoices.take(3)) { invoice ->
-                    InvoiceItem(invoice)
+
+            overdueInvoices?.let {
+                if (it.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No overdue invoices",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                } else {
+                    items(overdueInvoices.take(3)) { invoice ->
+                        InvoiceItem(invoice)
+                    }
                 }
             }
             
@@ -474,4 +494,28 @@ fun QuickAccessButton(
             textAlign = TextAlign.Center
         )
     }
-} 
+}
+
+@Preview
+@Composable
+fun FinanceDashboardScreenPreview() {
+    FinanceDashboardScreen(
+        observeUiState = MutableStateFlow(
+            FinanceUiState(
+                transactionsState = TransactionsUiState.Loading,
+                invoicesState = InvoicesUiState.Loading,
+                feesState = FeesUiState.Loading,
+                feeDetailState = FeeDetailState.Loading,
+                transactionDetailState = TransactionDetailState.Loading,
+                invoiceDetailState = InvoiceDetailState.Loading,
+            )
+        ).asStateFlow(),
+        onNavigateToTransactions = {},
+        onNavigateToInvoices = {},
+        onAddTransaction = {},
+        onNavigateToFees = {},
+        onNavigateToReports = {},
+        onNavigateToBudgets = { },
+        onNavigateBack = {},
+    )
+}

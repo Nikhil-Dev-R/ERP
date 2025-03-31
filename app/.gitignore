@@ -1,1 +1,19 @@
-/build
+# Gradle files
+gradle.properties
+local.properties
+
+# Build outputs
+/build/
+/out/
+build.gradle.kts
+
+# TOML files
+*.toml
+
+# Google Services
+google-services.json
+
+# Other files
+.DS_Store
+*.iml
+.idea/
