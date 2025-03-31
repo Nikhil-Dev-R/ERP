@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.google.firebase.firestore.LocalCacheSettings
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -85,6 +86,7 @@ class ERPApplication : Application() {
             // Initialize Firestore with settings
             firestore = FirebaseFirestore.getInstance()
             val settings = FirebaseFirestoreSettings.Builder()
+//                .setLocalCacheSettings(LocalCacheSettings)
                 .setPersistenceEnabled(true)
                 .build()
             firestore.firestoreSettings = settings

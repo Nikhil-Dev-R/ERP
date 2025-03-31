@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -55,6 +56,9 @@ import com.erp.modules.finance.ui.screens.InvoicesScreen
 import com.erp.modules.finance.ui.screens.InvoiceDetailScreen
 import com.erp.modules.finance.ui.screens.FinancialReportsScreen
 import com.erp.modules.finance.ui.screens.BudgetManagementScreen
+import com.erp.modules.finance.ui.viewmodel.FinanceUiState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 object ERPDestinations {
     const val LOGIN_ROUTE = "login"
@@ -197,7 +201,8 @@ fun ERPNavHost(
         // Finance module navigation
         composable(ERPDestinations.FINANCE_DASHBOARD_ROUTE) {
             FinanceDashboardScreen(
-                viewModel = viewModel.financeViewModel,
+                observeUiState = viewModel.financeViewModel.financeUiState,
+//                viewModel = viewModel.financeViewModel,
                 onNavigateToTransactions = {
                     navController.navigate(ERPDestinations.TRANSACTIONS_ROUTE)
                 },

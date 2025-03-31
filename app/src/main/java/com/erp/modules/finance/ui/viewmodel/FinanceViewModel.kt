@@ -17,18 +17,40 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.util.Date
 import java.util.UUID
 
+data class FinanceUiState(
+    val transactionsState: TransactionsUiState,
+    val invoicesState: InvoicesUiState,
+    val feesState: FeesUiState,
+    val feeDetailState: FeeDetailState,
+    val transactionDetailState: TransactionDetailState,
+    val invoiceDetailState: InvoiceDetailState,
+
+    val currentTransaction: Transaction? = null,
+    val currentInvoice: Invoice? = null,
+    val currentFee: Fee? = null,
+
+    val selectedTransaction: Transaction? = null,
+    val selectedInvoice: Invoice? = null,
+    val selectedFee: Fee? = null,
+
+    val transactions: List<Transaction> = emptyList(),
+    val invoices: List<Invoice> = emptyList(),
+    val fees: List<Fee> = emptyList(),
+    val overdueInvoices: List<Invoice> = emptyList()
+)
+
 class FinanceViewModel(
     private val transactionRepository: TransactionRepository,
     private val invoiceRepository: InvoiceRepository,
     private val feeRepository: FeeRepository
 ) : ViewModel() {
-    
     // Transaction States
     private val _transactionsState = MutableStateFlow<TransactionsUiState>(TransactionsUiState.Loading)
     val transactionsState: StateFlow<TransactionsUiState> = _transactionsState
@@ -56,17 +78,44 @@ class FinanceViewModel(
     
     private val _currentInvoice = MutableStateFlow<Invoice?>(null)
     val currentInvoice: StateFlow<Invoice?> = _currentInvoice
-    
+
     private val _currentFee = MutableStateFlow<Fee?>(null)
     val currentFee: StateFlow<Fee?> = _currentFee
-    
+
+    private val _financeUiState = MutableStateFlow<FinanceUiState?>(null)
+    val financeUiState: StateFlow<FinanceUiState?> = _financeUiState.asStateFlow()
+
     // Load initial data
     init {
         loadTransactions()
         loadInvoices()
         loadFees()
+        loadAll()
+
     }
-    
+
+    fun loadAll() {
+        viewModelScope.launch {
+            transactionRepository.getAll().collectLatest {
+                _financeUiState.value = _financeUiState.value?.copy(
+                    transactions = it
+                )
+            }
+
+            invoiceRepository.getAll().collectLatest {
+                _financeUiState.value = _financeUiState.value?.copy(
+                    invoices = it
+                )
+            }
+
+            feeRepository.getAllFees().collectLatest {
+                _financeUiState.value = _financeUiState.value?.copy(
+                    fees = it
+                )
+            }
+        }
+    }
+
     // Transactions
     val transactions = transactionRepository.getAll()
         .stateIn(
@@ -125,10 +174,16 @@ class FinanceViewModel(
     }
     
     fun selectTransaction(transaction: Transaction) {
+        _financeUiState.value = _financeUiState.value?.copy(
+            selectedTransaction = transaction
+        )
         _selectedTransaction.value = transaction
     }
     
     fun clearSelectedTransaction() {
+        _financeUiState.value = _financeUiState.value?.copy(
+            selectedTransaction = null
+        )
         _selectedTransaction.value = null
     }
     
@@ -184,10 +239,16 @@ class FinanceViewModel(
     }
     
     fun selectInvoice(invoice: Invoice) {
+        _financeUiState.value = _financeUiState.value?.copy(
+            selectedInvoice = invoice
+        )
         _selectedInvoice.value = invoice
     }
     
     fun clearSelectedInvoice() {
+        _financeUiState.value = _financeUiState.value?.copy(
+            selectedInvoice = null
+        )
         _selectedInvoice.value = null
     }
     
@@ -226,6 +287,9 @@ class FinanceViewModel(
     // Load data functions
     fun loadTransactions() {
         viewModelScope.launch {
+            _financeUiState.value = _financeUiState.value?.copy(
+                transactionsState = TransactionsUiState.Loading
+            )
             _transactionsState.value = TransactionsUiState.Loading
             
             // Add placeholder data for debugging
@@ -255,7 +319,10 @@ class FinanceViewModel(
                     type = TransactionType.EXPENSE
                 )
             )
-            
+
+            _financeUiState.value = _financeUiState.value?.copy(
+                transactionsState = TransactionsUiState.Success(placeholderTransactions)
+            )
             _transactionsState.value = TransactionsUiState.Success(placeholderTransactions)
             
             // Comment out original flow for now
@@ -277,6 +344,9 @@ class FinanceViewModel(
     
     fun loadInvoices() {
         viewModelScope.launch {
+            _financeUiState.value = _financeUiState.value?.copy(
+                invoicesState = InvoicesUiState.Loading
+            )
             _invoicesState.value = InvoicesUiState.Loading
             
             // Add placeholder data for debugging
@@ -312,7 +382,10 @@ class FinanceViewModel(
                     status = InvoiceStatus.OVERDUE
                 )
             )
-            
+
+            _financeUiState.value = _financeUiState.value?.copy(
+                invoicesState = InvoicesUiState.Success(placeholderInvoices)
+            )
             _invoicesState.value = InvoicesUiState.Success(placeholderInvoices)
             
             // Comment out original flow for now
@@ -335,13 +408,26 @@ class FinanceViewModel(
     // Fee functions
     fun loadFees() {
         viewModelScope.launch {
+            _financeUiState.value = _financeUiState.value?.copy(
+                feesState = FeesUiState.Loading
+            )
             _feesState.value = FeesUiState.Loading
             
             feeRepository.getAllFees()
                 .catch { error ->
-                    _feesState.value = FeesUiState.Error(error.message ?: "Unknown error")
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        feesState = FeesUiState.Error(error.message ?: "Unknown error")
+                    )
+//                    _feesState.value = FeesUiState.Error(error.message ?: "Unknown error")
                 }
                 .collect { fees ->
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        feesState = if (fees.isEmpty()) {
+                            FeesUiState.Success(fees)
+                        } else {
+                            FeesUiState.Success(fees)
+                        }
+                    )
                     _feesState.value = if (fees.isEmpty()) {
                         FeesUiState.Empty
                     } else {
@@ -353,13 +439,26 @@ class FinanceViewModel(
     
     fun loadFeesByStudent(studentId: String) {
         viewModelScope.launch {
+            _financeUiState.value = _financeUiState.value?.copy(
+                feesState = FeesUiState.Loading
+            )
             _feesState.value = FeesUiState.Loading
             
             feeRepository.getFeesByStudent(studentId)
                 .catch { error ->
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        feesState = FeesUiState.Error(error.message ?: "Unknown error")
+                    )
                     _feesState.value = FeesUiState.Error(error.message ?: "Unknown error")
                 }
                 .collect { fees ->
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        feesState = if (fees.isEmpty()) {
+                            FeesUiState.Success(fees)
+                        } else {
+                            FeesUiState.Success(fees)
+                        }
+                    )
                     _feesState.value = if (fees.isEmpty()) {
                         FeesUiState.Empty
                     } else {
@@ -371,13 +470,26 @@ class FinanceViewModel(
     
     fun loadPendingFees() {
         viewModelScope.launch {
+            _financeUiState.value = _financeUiState.value?.copy(
+                feesState = FeesUiState.Loading
+            )
             _feesState.value = FeesUiState.Loading
             
             feeRepository.getPendingFees()
                 .catch { error ->
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        feesState = FeesUiState.Error(error.message ?: "Unknown error")
+                    )
                     _feesState.value = FeesUiState.Error(error.message ?: "Unknown error")
                 }
                 .collect { fees ->
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        feesState = if (fees.isEmpty()) {
+                            FeesUiState.Success(fees)
+                        } else {
+                            FeesUiState.Success(fees)
+                        }
+                    )
                     _feesState.value = if (fees.isEmpty()) {
                         FeesUiState.Empty
                     } else {
@@ -389,20 +501,38 @@ class FinanceViewModel(
     
     fun getFeeDetail(id: String) {
         viewModelScope.launch {
+            _financeUiState.value = _financeUiState.value?.copy(
+                feeDetailState = FeeDetailState.Loading
+            )
             _feeDetailState.value = FeeDetailState.Loading
             
             feeRepository.getFeeById(id)
                 .catch { error ->
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        feeDetailState = FeeDetailState.Error(error.message ?: "Unknown error")
+                    )
                     _feeDetailState.value = FeeDetailState.Error(error.message ?: "Unknown error")
                 }
                 .collect { fee ->
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        feeDetailState = FeeDetailState.Success(fee)
+                    )
                     _feeDetailState.value = FeeDetailState.Success(fee)
+                    _financeUiState.value = _financeUiState.value?.copy(
+                        currentFee = fee
+                    )
                     _currentFee.value = fee
                 }
         }
     }
     
     fun createNewFee() {
+        _financeUiState.value = _financeUiState.value?.copy(
+            currentFee = Fee(
+                dueDate = Date(),
+                academicYear = "2023-2024"
+            )
+        )
         _currentFee.value = Fee(
             dueDate = Date(),
             academicYear = "2023-2024"
@@ -476,6 +606,9 @@ class FinanceViewModel(
     // Transaction Detail functions
     fun getTransactionDetail(id: String) {
         viewModelScope.launch {
+            _financeUiState.value = _financeUiState.value?.copy(
+                transactionDetailState = TransactionDetailState.Loading
+            )
             _transactionDetailState.value = TransactionDetailState.Loading
             
             try {
@@ -488,16 +621,24 @@ class FinanceViewModel(
                     status = TransactionStatus.COMPLETED,
                     type = TransactionType.EXPENSE
                 )
+
+                _financeUiState.value = _financeUiState.value?.copy(
+                    transactionDetailState = TransactionDetailState.Success(transaction),
+                    currentTransaction = transaction
+                )
                 _transactionDetailState.value = TransactionDetailState.Success(transaction)
                 _currentTransaction.value = transaction
             } catch (e: Exception) {
+                _financeUiState.value = _financeUiState.value?.copy(
+                    transactionDetailState = TransactionDetailState.Error(e.message ?: "Unknown error")
+                )
                 _transactionDetailState.value = TransactionDetailState.Error(e.message ?: "Unknown error")
             }
         }
     }
     
     fun createNewTransaction() {
-        _currentTransaction.value = Transaction(
+        val currentTransaction = Transaction(
             id = UUID.randomUUID().toString(),
             amount = BigDecimal.ZERO,
             description = "",
@@ -505,12 +646,20 @@ class FinanceViewModel(
             status = TransactionStatus.COMPLETED,
             type = TransactionType.EXPENSE
         )
+        _currentTransaction.value = currentTransaction
+        _financeUiState.value = _financeUiState.value?.copy(
+            currentTransaction = currentTransaction,
+            transactionDetailState = TransactionDetailState.Success(currentTransaction)
+        )
         _transactionDetailState.value = TransactionDetailState.Success(_currentTransaction.value!!)
     }
     
     // Invoice Detail functions
     fun getInvoiceDetail(id: String) {
         viewModelScope.launch {
+            _financeUiState.value = _financeUiState.value?.copy(
+                invoiceDetailState = InvoiceDetailState.Loading
+            )
             _invoiceDetailState.value = InvoiceDetailState.Loading
             
             try {
@@ -525,16 +674,24 @@ class FinanceViewModel(
                     dueDate = Date(),
                     status = InvoiceStatus.DRAFT
                 )
+
+                _financeUiState.value = _financeUiState.value?.copy(
+                    invoiceDetailState = InvoiceDetailState.Success(invoice),
+                    currentInvoice = invoice
+                )
                 _invoiceDetailState.value = InvoiceDetailState.Success(invoice)
                 _currentInvoice.value = invoice
             } catch (e: Exception) {
+                _financeUiState.value = _financeUiState.value?.copy(
+                    invoiceDetailState = InvoiceDetailState.Error(e.message ?: "Unknown error")
+                )
                 _invoiceDetailState.value = InvoiceDetailState.Error(e.message ?: "Unknown error")
             }
         }
     }
     
     fun createNewInvoice() {
-        _currentInvoice.value = Invoice(
+        val currentInvoice = Invoice(
             id = UUID.randomUUID().toString(),
             invoiceNumber = "",
             customerId = "",
@@ -543,6 +700,11 @@ class FinanceViewModel(
             issueDate = Date(),
             dueDate = Date(),
             status = InvoiceStatus.DRAFT
+        )
+        _currentInvoice.value = currentInvoice
+        _financeUiState.value = _financeUiState.value?.copy(
+            currentInvoice = currentInvoice,
+            invoiceDetailState = InvoiceDetailState.Success(currentInvoice)
         )
         _invoiceDetailState.value = InvoiceDetailState.Success(_currentInvoice.value!!)
     }
