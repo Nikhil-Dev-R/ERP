@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -19,6 +19,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.erp.core.ui.screens.HomeScreen
 import com.erp.core.ui.screens.LoginScreen
+import com.erp.data.UserRole
 import com.erp.modules.finance.ui.screens.FinanceDashboardScreen
 import com.erp.modules.hr.ui.screens.HRDashboardScreen
 import com.erp.modules.inventory.ui.screens.InventoryDashboardScreen
@@ -45,7 +46,7 @@ import com.erp.modules.exam.ui.screens.ResultsViewScreen
 import com.erp.modules.hr.ui.screens.EmployeeDetailScreen
 import com.erp.modules.inventory.ui.screens.VendorsScreen
 import com.erp.modules.hr.ui.screens.AddEmployeeScreen
-import com.erp.modules.hr.ui.screens.LeaveRequestsScreen
+import com.erp.modules.teacher.ui.screens.LeaveRequestsScreen
 import com.erp.modules.hr.ui.screens.LeaveRequestDetailScreen
 import com.erp.modules.fee.ui.screens.FeeListScreen
 import com.erp.modules.fee.ui.screens.FeeDetailScreen
@@ -56,9 +57,6 @@ import com.erp.modules.finance.ui.screens.InvoicesScreen
 import com.erp.modules.finance.ui.screens.InvoiceDetailScreen
 import com.erp.modules.finance.ui.screens.FinancialReportsScreen
 import com.erp.modules.finance.ui.screens.BudgetManagementScreen
-import com.erp.modules.finance.ui.viewmodel.FinanceUiState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 object ERPDestinations {
     const val LOGIN_ROUTE = "login"
@@ -88,6 +86,7 @@ object ERPDestinations {
     const val PAYROLL_ROUTE = "payroll"
     
     // Student module
+    const val STUDENT_HOME = "student_home"
     const val STUDENTS_DASHBOARD_ROUTE = "students_dashboard"
     const val STUDENTS_ROUTE = "students"
     const val STUDENT_DETAIL_ROUTE = "student_detail"
@@ -155,7 +154,22 @@ fun ERPNavHost(
         composable(ERPDestinations.LOGIN_ROUTE) {
             LoginScreen(
                 authManager = viewModel.authManager,
-                onLoginSuccess = {
+                onLoginSuccess = { role: UserRole, id: String ->
+                    when (role) {
+                        // Navigate to home screens based on roles
+                        is UserRole.Admin -> {
+
+                        }
+                        is UserRole.Parent -> {
+
+                        }
+                        is UserRole.Student -> {
+                            navController.navigate("${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$id")
+                        }
+                        else -> {
+
+                        }
+                    }
                     navController.navigate(ERPDestinations.HOME_ROUTE) {
                         popUpTo(ERPDestinations.LOGIN_ROUTE) { inclusive = true }
                     }
@@ -467,7 +481,7 @@ fun ERPNavHost(
         // Student module navigation
         composable(ERPDestinations.STUDENTS_DASHBOARD_ROUTE) {
             StudentDashboardScreen(
-                viewModel = viewModel.studentViewModel,
+//                viewModel = viewModel.studentViewModel,
                 onNavigateToStudentsList = {
                     navController.navigate(ERPDestinations.STUDENTS_ROUTE)
                 },
@@ -514,9 +528,21 @@ fun ERPNavHost(
             )
         ) { backStackEntry ->
             val studentId = backStackEntry.arguments?.getString("studentId")
+
+            LaunchedEffect(studentId) {
+                if (studentId != null) {
+                    viewModel.studentViewModel.getStudentDetail(studentId)
+                } else {
+                    viewModel.studentViewModel.createNewStudent()
+                }
+            }
+
             StudentDetailScreen(
-                viewModel = viewModel.studentViewModel,
+//                viewModel = viewModel.studentViewModel,
+                studentDetailUiStateFlow = viewModel.studentViewModel.studentDetailState,
+                role = UserRole.Admin,
                 studentId = studentId,
+                deleteStudent = viewModel.studentViewModel::deleteStudent,
                 onNavigateBack = {
                     navController.navigateUp()
                 },

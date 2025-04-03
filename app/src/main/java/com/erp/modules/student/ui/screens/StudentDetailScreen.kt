@@ -19,32 +19,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.erp.data.UserRole
 import com.erp.modules.student.data.model.Student
 import com.erp.modules.student.ui.viewmodel.StudentDetailUiState
 import com.erp.modules.student.ui.viewmodel.StudentViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentDetailScreen(
-    viewModel: StudentViewModel,
-    studentId: String?,
-    onNavigateBack: () -> Unit,
-    onNavigateToEdit: (String?) -> Unit
+//    viewModel: StudentViewModel,
+    studentDetailUiStateFlow: StateFlow<StudentDetailUiState>,
+    role: UserRole,
+    studentId: String? = null,
+    deleteStudent: (Student) -> Unit = {},
+    onNavigateBack: () -> Unit = {},
+    onNavigateToEdit: (String?) -> Unit = {}
 ) {
-    val studentDetailState by viewModel.studentDetailState.collectAsState()
+    val studentDetailState by studentDetailUiStateFlow.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
-    
-    LaunchedEffect(studentId) {
-        if (studentId != null) {
-            viewModel.getStudentDetail(studentId)
-        } else {
-            viewModel.createNewStudent()
-        }
-    }
     
     Scaffold(
         topBar = {
@@ -59,21 +59,23 @@ fun StudentDetailScreen(
                     }
                 },
                 actions = {
-                    if (studentId != null) {
-                        // Edit button
-                        IconButton(onClick = { onNavigateToEdit(studentId) }) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Student"
-                            )
-                        }
-                        
-                        // Delete button
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete Student"
-                            )
+                    if (role == UserRole.Admin || role == UserRole.Teacher) {
+                        if (studentId != null) {
+                            // Edit button
+                            IconButton(onClick = { onNavigateToEdit(studentId) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit Student"
+                                )
+                            }
+
+                            // Delete button
+                            IconButton(onClick = { showDeleteDialog = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete Student"
+                                )
+                            }
                         }
                     }
                 }
@@ -106,7 +108,7 @@ fun StudentDetailScreen(
                         confirmButton = {
                             TextButton(
                                 onClick = {
-                                    viewModel.deleteStudent(state.student)
+                                    deleteStudent(state.student)
                                     showDeleteDialog = false
                                     onNavigateBack()
                                 }
@@ -228,77 +230,112 @@ fun StudentDetailContent(
                     .padding(16.dp)
             ) {
                 SectionTitle(title = "Personal Information")
-                
+
                 InfoRow(
                     icon = Icons.Default.Cake,
                     label = "Date of Birth",
                     value = student.dateOfBirth?.let { formatDate(it) } ?: "Not provided"
                 )
-                
+
                 InfoRow(
                     icon = Icons.Default.Wc,
                     label = "Gender",
                     value = student.gender
                 )
-                
+
                 InfoRow(
                     icon = Icons.Default.Bloodtype,
                     label = "Blood Group",
                     value = student.bloodGroup
                 )
-                
+
                 InfoRow(
                     icon = Icons.Default.Home,
                     label = "Address",
                     value = student.address
                 )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 SectionTitle(title = "Contact Information")
-                
+
                 InfoRow(
                     icon = Icons.Default.Call,
                     label = "Phone",
                     value = student.contactNumber
                 )
-                
+
                 InfoRow(
                     icon = Icons.Default.Email,
                     label = "Email",
                     value = student.email
                 )
-                
+
                 InfoRow(
                     icon = Icons.Default.MedicalServices,
                     label = "Emergency Contact",
                     value = student.emergencyContact
                 )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Student Details
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 SectionTitle(title = "Parent Information")
-                
+
                 InfoRow(
                     icon = Icons.Default.Person,
                     label = "Parent Name",
                     value = student.parentName
                 )
-                
+
                 InfoRow(
                     icon = Icons.Default.Call,
                     label = "Parent Contact",
                     value = student.parentContact
                 )
-                
+
                 InfoRow(
                     icon = Icons.Default.Email,
                     label = "Parent Email",
                     value = student.parentEmail
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
                 SectionTitle(title = "Academic Information")
                 
                 InfoRow(
@@ -399,4 +436,15 @@ fun InfoChip(
 // Helper function to format dates
 private fun formatDate(date: Date): String {
     return SimpleDateFormat("dd MMM, yyyy", Locale.getDefault()).format(date)
-} 
+}
+
+@Preview
+@Composable
+fun SDSPreview() {
+    StudentDetailScreen(
+        studentDetailUiStateFlow = MutableStateFlow<StudentDetailUiState>(
+            StudentDetailUiState.Success(Student())
+        ).asStateFlow(),
+        role = UserRole.Admin
+    )
+}

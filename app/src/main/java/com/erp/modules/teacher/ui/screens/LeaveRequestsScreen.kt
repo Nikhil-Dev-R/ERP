@@ -1,4 +1,4 @@
-package com.erp.modules.hr.ui.screens
+package com.erp.modules.teacher.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -172,7 +172,7 @@ fun LeaveRequestsScreen(
                     }
                 } else {
                     items(filteredRequests) { leaveRequest ->
-                        com.erp.modules.teacher.ui.screens.LeaveRequestItem(
+                        LeaveRequestItem(
                             leaveRequest = leaveRequest,
                             employee = employees.find { it.id == leaveRequest.employeeId },
                             onClick = { onNavigateToDetail(leaveRequest.id) }

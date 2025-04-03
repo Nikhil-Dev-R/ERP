@@ -225,7 +225,10 @@ fun AttendanceReportsTab(viewModel: AttendanceViewModel) {
                         .fillMaxWidth()
                         .height(200.dp)
                         .padding(vertical = 16.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp)),
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            RoundedCornerShape(8.dp)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text("Attendance Chart")
@@ -407,7 +410,7 @@ fun ClassComparisonItem(className: String, attendancePercentage: Int) {
         
         Row(verticalAlignment = Alignment.CenterVertically) {
             LinearProgressIndicator(
-                progress = attendancePercentage / 100f,
+                progress = { attendancePercentage / 100f },
                 modifier = Modifier
                     .width(100.dp)
                     .height(8.dp),
@@ -473,7 +476,7 @@ fun StudentAttendanceRecordItem(
             Spacer(modifier = Modifier.height(8.dp))
             
             LinearProgressIndicator(
-                progress = attendancePercentage / 100,
+                progress = { attendancePercentage / 100 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp),

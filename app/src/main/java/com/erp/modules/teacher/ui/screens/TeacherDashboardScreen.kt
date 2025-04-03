@@ -1,4 +1,4 @@
-package com.erp.modules.hr.ui.screens
+package com.erp.modules.teacher.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -44,7 +44,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.erp.modules.hr.data.model.Employee
 import com.erp.modules.hr.data.model.EmployeeStatus
 import com.erp.modules.hr.data.model.LeaveRequest
@@ -55,10 +57,11 @@ import com.erp.modules.hr.ui.viewmodel.HRViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 import com.erp.common.util.CurrencyFormatter
+import com.erp.modules.teacher.ui.viewmodel.TeacherViewModel
 
 @Composable
-fun HRDashboardScreen(
-    viewModel: HRViewModel,
+fun TeacherDashboardScreen(
+    viewModel: TeacherViewModel,
     onNavigateToEmployees: () -> Unit,
     onNavigateToLeaveRequests: () -> Unit,
     onNavigateToPayroll: () -> Unit,
@@ -88,7 +91,7 @@ fun HRDashboardScreen(
                 .padding(padding)
         ) {
             Text(
-                text = "HR Dashboard",
+                text = "Teacher Dashboard",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -108,7 +111,7 @@ fun HRDashboardScreen(
             }
             
             when (selectedTabIndex) {
-                0 -> com.erp.modules.teacher.ui.screens.OverviewTab(
+                0 -> OverviewTab(
                     employees = employees,
                     pendingLeaveRequests = pendingLeaveRequests,
                     pendingSalaries = pendingSalaries,
@@ -117,19 +120,19 @@ fun HRDashboardScreen(
                     onNavigateToPayroll = onNavigateToPayroll,
                     onEmployeeDetails = onEmployeeDetails
                 )
-                1 -> com.erp.modules.teacher.ui.screens.EmployeesTab(
+                1 -> EmployeesTab(
                     employees = employees,
                     onEmployeeDetails = onEmployeeDetails
                 )
-                2 -> com.erp.modules.teacher.ui.screens.LeavesTab(
+                2 -> LeavesTab(
                     leaveRequests = leaveRequests,
                     onNavigateToLeaveRequests = onNavigateToLeaveRequests,
-                    onLeaveDetails = { leaveRequestId ->
+                    onLeaveDetails = { leaveRequestId -> 
                         onNavigateToLeaveRequests()
                         // The specific leave request will be handled by the LeaveRequestsScreen 
                     }
                 )
-                3 -> com.erp.modules.teacher.ui.screens.PayrollTab(
+                3 -> PayrollTab(
                     salaries = salaries,
                     onSalaryDetails = { /* Navigate to salary details */ }
                 )
@@ -155,7 +158,7 @@ fun OverviewTab(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            com.erp.modules.teacher.ui.screens.HRSummaryCard(
+            HRSummaryCard(
                 employees = employees,
                 pendingLeaves = pendingLeaveRequests.size,
                 pendingPayments = pendingSalaries.size
@@ -163,7 +166,7 @@ fun OverviewTab(
         }
         
         item {
-            com.erp.modules.teacher.ui.screens.StatisticsCard(employees)
+            StatisticsCard(employees)
         }
         
         item {
@@ -177,7 +180,7 @@ fun OverviewTab(
         
         val recentEmployees = employees.sortedByDescending { it.hireDate }.take(5)
         items(recentEmployees) { employee ->
-            com.erp.modules.teacher.ui.screens.EmployeeItem(
+            EmployeeItem(
                 employee = employee,
                 onEmployeeClick = { onEmployeeDetails(employee.id) }
             )
@@ -220,7 +223,7 @@ fun OverviewTab(
             }
         } else {
             items(pendingLeaveRequests.take(3)) { leaveRequest ->
-                com.erp.modules.teacher.ui.screens.LeaveRequestItem(
+                LeaveRequestItem(
                     leaveRequest = leaveRequest,
                     onClick = { onNavigateToLeaveRequests() }
                 )
@@ -264,7 +267,7 @@ fun OverviewTab(
             }
         } else {
             items(pendingSalaries.take(3)) { salary ->
-                com.erp.modules.teacher.ui.screens.SalaryItem(salary)
+                SalaryItem(salary)
             }
         }
         
@@ -367,7 +370,7 @@ fun EmployeesTab(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        com.erp.modules.teacher.ui.screens.EmployeeFilterSection(employees)
+        EmployeeFilterSection(employees)
         
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -398,7 +401,7 @@ fun EmployeesTab(
             }
             
             items(employees.sortedBy { "${it.lastName} ${it.firstName}" }) { employee ->
-                com.erp.modules.teacher.ui.screens.EmployeeItem(
+                EmployeeItem(
                     employee = employee,
                     onEmployeeClick = { onEmployeeDetails(employee.id) }
                 )
@@ -488,7 +491,7 @@ fun LeavesTab(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        com.erp.modules.teacher.ui.screens.LeaveStatisticsCard(leaveRequests)
+        LeaveStatisticsCard(leaveRequests)
         
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -532,7 +535,7 @@ fun LeavesTab(
                 }
                 
                 items(pendingLeaves.sortedByDescending { it.createdAt }) { leaveRequest ->
-                    com.erp.modules.teacher.ui.screens.LeaveRequestItem(
+                    LeaveRequestItem(
                         leaveRequest = leaveRequest,
                         onClick = { onLeaveDetails(leaveRequest.id) }
                     )
@@ -551,7 +554,7 @@ fun LeavesTab(
                 }
                 
                 items(otherLeaves.sortedByDescending { it.createdAt }.take(10)) { leaveRequest ->
-                    com.erp.modules.teacher.ui.screens.LeaveRequestItem(
+                    LeaveRequestItem(
                         leaveRequest = leaveRequest,
                         onClick = { onLeaveDetails(leaveRequest.id) }
                     )
@@ -588,21 +591,21 @@ fun LeaveStatisticsCard(leaveRequests: List<LeaveRequest>) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                com.erp.modules.teacher.ui.screens.LeaveStatusItem(
+                LeaveStatusItem(
                     count = pendingCount,
                     total = leaveRequests.size,
                     label = "Pending",
                     color = MaterialTheme.colorScheme.tertiary
                 )
-
-                com.erp.modules.teacher.ui.screens.LeaveStatusItem(
+                
+                LeaveStatusItem(
                     count = approvedCount,
                     total = leaveRequests.size,
                     label = "Approved",
                     color = MaterialTheme.colorScheme.primary
                 )
-
-                com.erp.modules.teacher.ui.screens.LeaveStatusItem(
+                
+                LeaveStatusItem(
                     count = rejectedCount,
                     total = leaveRequests.size,
                     label = "Rejected",
@@ -646,7 +649,7 @@ fun PayrollTab(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        com.erp.modules.teacher.ui.screens.PayrollStatisticsCard(salaries)
+        PayrollStatisticsCard(salaries)
         
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -688,7 +691,7 @@ fun PayrollTab(
                 }
                 
                 items(pendingSalaries.sortedByDescending { it.payPeriodEnd }) { salary ->
-                    com.erp.modules.teacher.ui.screens.SalaryItem(
+                    SalaryItem(
                         salary = salary,
                         onClick = { onSalaryDetails(salary.id) }
                     )
@@ -707,7 +710,7 @@ fun PayrollTab(
                 }
                 
                 items(processedSalaries.sortedByDescending { it.payPeriodEnd }) { salary ->
-                    com.erp.modules.teacher.ui.screens.SalaryItem(
+                    SalaryItem(
                         salary = salary,
                         onClick = { onSalaryDetails(salary.id) }
                     )
@@ -726,7 +729,7 @@ fun PayrollTab(
                 }
                 
                 items(paidSalaries.sortedByDescending { it.paymentDate }.take(5)) { salary ->
-                    com.erp.modules.teacher.ui.screens.SalaryItem(
+                    SalaryItem(
                         salary = salary,
                         onClick = { onSalaryDetails(salary.id) }
                     )
@@ -831,19 +834,19 @@ fun HRSummaryCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                com.erp.modules.teacher.ui.screens.SummaryItem(
+                SummaryItem(
                     icon = Icons.Default.Person,
                     value = totalEmployees.toString(),
                     label = "Total Employees"
                 )
-
-                com.erp.modules.teacher.ui.screens.SummaryItem(
+                
+                SummaryItem(
                     icon = Icons.Default.School,
                     value = teacherCount.toString(),
                     label = "Teachers"
                 )
-
-                com.erp.modules.teacher.ui.screens.SummaryItem(
+                
+                SummaryItem(
                     icon = Icons.Default.AccessTime,
                     value = onLeaveEmployees.toString(),
                     label = "On Leave"
@@ -858,14 +861,14 @@ fun HRSummaryCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                com.erp.modules.teacher.ui.screens.SummaryItem(
+                SummaryItem(
                     icon = Icons.Default.AccessTime,
                     value = pendingLeaves.toString(),
                     label = "Pending Leaves",
                     tint = MaterialTheme.colorScheme.tertiary
                 )
-
-                com.erp.modules.teacher.ui.screens.SummaryItem(
+                
+                SummaryItem(
                     icon = Icons.Default.AttachMoney,
                     value = pendingPayments.toString(),
                     label = "Pending Payments",
@@ -1094,3 +1097,11 @@ fun SalaryItem(
     }
 }
 
+@Preview
+@Composable
+fun TDSPreview() {
+    TeacherDashboardScreen(
+        viewModel = viewModel<TeacherViewModel>(),
+        {}, {}, {}, {}, {}
+    )
+}
