@@ -225,7 +225,7 @@ fun TimeTableEntryCard(
             }
             
             // Vertical divider
-            Divider(
+            HorizontalDivider(
                 modifier = Modifier
                     .height(64.dp)
                     .width(1.dp),

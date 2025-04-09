@@ -17,13 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.erp.modules.student.ui.viewmodel.StudentViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentDashboardScreen(
-    viewModel: StudentViewModel,
+//    viewModel: StudentViewModel,
     onNavigateToStudentsList: () -> Unit,
     onNavigateToAddStudent: () -> Unit,
     onNavigateToStudentsByClass: () -> Unit,
@@ -284,4 +285,12 @@ fun StatCard(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
-} 
+}
+
+@Preview
+@Composable
+fun StudentPreview() {
+    StudentDashboardScreen(
+        {}, {}, {}, {}, {},
+    )
+}
