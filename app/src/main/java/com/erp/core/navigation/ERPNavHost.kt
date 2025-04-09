@@ -158,13 +158,24 @@ fun ERPNavHost(
                     when (role) {
                         // Navigate to home screens based on roles
                         is UserRole.Admin -> {
-
+                            navController.navigate(ERPDestinations.HOME_ROUTE) {
+                                popUpTo(ERPDestinations.LOGIN_ROUTE) { inclusive = true }
+                            }
+                        }
+                        is UserRole.Teacher -> {
+                            navController.navigate("${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$id") {
+                                popUpTo(ERPDestinations.LOGIN_ROUTE) { inclusive = true }
+                            }
                         }
                         is UserRole.Parent -> {
-
+                            navController.navigate("${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$id") {
+                                popUpTo(ERPDestinations.LOGIN_ROUTE) { inclusive = true }
+                            }
                         }
                         is UserRole.Student -> {
-                            navController.navigate("${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$id")
+                            navController.navigate("${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$id") {
+                                popUpTo(ERPDestinations.LOGIN_ROUTE) { inclusive = true }
+                            }
                         }
                         else -> {
 
