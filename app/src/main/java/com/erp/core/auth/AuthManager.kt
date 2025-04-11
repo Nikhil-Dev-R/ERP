@@ -37,7 +37,7 @@ class AuthManager(private val context: Context) {
             // Only update SharedPreferences if Firebase auth state changes
             if (firebaseLoggedIn != _isLoggedIn.value && firebaseLoggedIn) {
                 Log.d("AuthManager", "Firebase auth state changed, updating prefs: $firebaseLoggedIn")
-                prefs.edit() { putBoolean(KEY_IS_LOGGED_IN, firebaseLoggedIn) }
+                prefs.edit { putBoolean(KEY_IS_LOGGED_IN, firebaseLoggedIn) }
                 _isLoggedIn.value = firebaseLoggedIn
             }
         }
@@ -75,6 +75,27 @@ class AuthManager(private val context: Context) {
         
         _isLoggedIn.value = true
         Log.d("AuthManager", "Simulated sign in complete, login state: ${_isLoggedIn.value}")
+    }
+
+    suspend fun signUpWithEmailAndPassword(email: String, password: String): Result<FirebaseUser> {
+        return try {
+            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+            val user = authResult.user ?: throw Exception("Authentication failed")
+
+            // Store sign up state in SharedPreferences
+            val prefs = context.getSharedPreferences(AUTH_PREFS, Context.MODE_PRIVATE)
+            prefs.edit {
+                putBoolean(KEY_IS_LOGGED_IN, true)
+            }
+
+            _isLoggedIn.value = true
+            Log.d("AuthManager", "Sign up successful, updated register state")
+
+            Result.success(user)
+        } catch (e: Exception) {
+            Log.e("AuthManager", "Sign up failed: ${e.message}")
+            Result.failure(e)
+        }
     }
     
     fun signOut() {

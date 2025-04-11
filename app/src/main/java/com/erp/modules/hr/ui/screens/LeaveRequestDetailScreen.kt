@@ -6,8 +6,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +51,7 @@ fun LeaveRequestDetailScreen(
                 title = { Text("Leave Request Details") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -154,8 +156,8 @@ fun LeaveRequestDetailScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            
-                            Divider()
+
+                            HorizontalDivider()
                             
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 Text(
@@ -215,8 +217,8 @@ fun LeaveRequestDetailScreen(
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
-                        
-                        Divider()
+
+                        HorizontalDivider()
                         
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Text(
@@ -293,8 +295,8 @@ fun LeaveRequestDetailScreen(
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
-                            
-                            Divider()
+
+                            HorizontalDivider()
                             
                             OutlinedTextField(
                                 value = comments,
