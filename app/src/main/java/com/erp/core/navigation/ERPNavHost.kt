@@ -125,7 +125,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.HOME_ROUTE) {
             HomeScreen(
                 onNavigateToFinance = {
@@ -160,7 +160,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // Finance module navigation
         composable(ERPDestinations.FINANCE_DASHBOARD_ROUTE) {
             FinanceDashboardScreen(
@@ -186,10 +186,11 @@ fun ERPNavHost(
                 },
                 onNavigateBack = {
                     navController.navigateUp()
-                }
+                },
+                observeUiState1 = viewModel.financeViewModel.financeUiState
             )
         }
-        
+
         // Add the missing transaction detail route
         composable(ERPDestinations.TRANSACTION_DETAIL_ROUTE) {
             TransactionDetailScreen(
@@ -200,7 +201,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(
             route = "${ERPDestinations.TRANSACTION_DETAIL_ROUTE}/{transactionId}",
             arguments = listOf(
@@ -218,7 +219,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.TRANSACTIONS_ROUTE) {
             TransactionsScreen(
                 viewModel = viewModel.financeViewModel,
@@ -234,7 +235,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.INVOICES_ROUTE) {
             InvoicesScreen(
                 viewModel = viewModel.financeViewModel,
@@ -250,7 +251,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.INVOICE_DETAIL_ROUTE) {
             InvoiceDetailScreen(
                 viewModel = viewModel.financeViewModel,
@@ -260,7 +261,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(
             route = "${ERPDestinations.INVOICE_DETAIL_ROUTE}/{invoiceId}",
             arguments = listOf(
@@ -278,14 +279,14 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.FEES_ROUTE) {
             PlaceholderScreen(
-                title = "School Fees", 
+                title = "School Fees",
                 message = "Fee management screens are under development"
             )
         }
-        
+
         // Fee module navigation
         composable(ERPDestinations.FEE_MODULE_DASHBOARD_ROUTE) {
             FeeListScreen(
@@ -298,7 +299,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(
             route = "${ERPDestinations.FEE_MODULE_DETAIL_ROUTE}/{feeId}",
             arguments = listOf(
@@ -316,7 +317,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.FEE_MODULE_CREATE_ROUTE) {
             FeeCreateScreen(
                 viewModel = viewModel.feeViewModel,
@@ -325,7 +326,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // HR module navigation (Teachers/Staff)
         composable(ERPDestinations.HR_DASHBOARD_ROUTE) {
             HRDashboardScreen(
@@ -347,7 +348,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // Add new route for employee form/add employee screen
         composable(ERPDestinations.EMPLOYEE_FORM_ROUTE) {
             AddEmployeeScreen(
@@ -357,14 +358,14 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.EMPLOYEES_ROUTE) {
             PlaceholderScreen(
-                title = "Teachers & Staff", 
+                title = "Teachers & Staff",
                 message = "This screen is under development"
             )
         }
-        
+
         composable(
             route = "${ERPDestinations.EMPLOYEE_DETAIL_ROUTE}/{employeeId}",
             arguments = listOf(
@@ -388,7 +389,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.LEAVE_REQUESTS_ROUTE) {
             LeaveRequestsScreen(
                 viewModel = viewModel.hrViewModel,
@@ -400,7 +401,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // Leave request detail route
         composable(
             route = "${ERPDestinations.LEAVE_REQUESTS_ROUTE}/{leaveRequestId}",
@@ -419,14 +420,14 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.PAYROLL_ROUTE) {
             PlaceholderScreen(
-                title = "Payroll Management", 
+                title = "Payroll Management",
                 message = "This screen is under development"
             )
         }
-        
+
         // Student module navigation
         composable(ERPDestinations.STUDENTS_DASHBOARD_ROUTE) {
             StudentDashboardScreen(
@@ -449,7 +450,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.STUDENTS_ROUTE) {
             StudentsScreen(
                 viewModel = viewModel.studentViewModel,
@@ -465,7 +466,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(
             route = ERPDestinations.STUDENT_DETAIL_ROUTE + "?studentId={studentId}",
             arguments = listOf(
@@ -489,7 +490,7 @@ fun ERPNavHost(
             StudentDetailScreen(
 //                viewModel = viewModel.studentViewModel,
                 studentDetailUiStateFlow = viewModel.studentViewModel.studentDetailState,
-                role = UserRole.Admin,
+                role = Admin,
                 studentId = studentId,
                 deleteStudent = viewModel.studentViewModel::deleteStudent,
                 onNavigateBack = {
@@ -500,7 +501,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // Add new route for student form
         composable(
             route = ERPDestinations.STUDENT_FORM_ROUTE + "?studentId={studentId}",
@@ -521,7 +522,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // Academics module navigation
         composable(ERPDestinations.ACADEMICS_DASHBOARD_ROUTE) {
             AcademicsScreen(
@@ -529,7 +530,7 @@ fun ERPNavHost(
                 navController = navController
             )
         }
-        
+
         // Class selection screen
         composable(ERPDestinations.CLASS_SELECTION_ROUTE) {
             ClassSelectionScreen(
@@ -540,7 +541,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // Subjects by class screen
         composable(
             route = "${ERPDestinations.SUBJECTS_BY_CLASS_ROUTE}/{gradeLevel}",
@@ -557,7 +558,7 @@ fun ERPNavHost(
                 gradeLevel = gradeLevel
             )
         }
-        
+
         // Subject detail screen
         composable(
             route = "subject_detail/{subjectId}",
@@ -574,7 +575,7 @@ fun ERPNavHost(
                 subjectId = subjectId
             )
         }
-        
+
         // Section selection screen
         composable(ERPDestinations.SECTION_SELECTION_ROUTE) {
             SectionSelectionScreen(
@@ -585,7 +586,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // Section Files screen
         composable(
             route = "${ERPDestinations.SECTION_FILES_ROUTE}/{section}",
@@ -602,7 +603,7 @@ fun ERPNavHost(
                 section = section
             )
         }
-        
+
         // TimeTable screen with classroom ID
         composable(
             route = "${ERPDestinations.TIMETABLE_ROUTE}/{classRoomId}",
@@ -619,7 +620,7 @@ fun ERPNavHost(
                 classRoomId = classRoomId
             )
         }
-        
+
         // Attendance module navigation
         composable(ERPDestinations.ATTENDANCE_DASHBOARD_ROUTE) {
             AttendanceScreen(
@@ -627,21 +628,21 @@ fun ERPNavHost(
                 navController = navController
             )
         }
-        
+
         composable(ERPDestinations.ATTENDANCE_MARK_ROUTE) {
             PlaceholderScreen(
-                title = "Mark Attendance", 
+                title = "Mark Attendance",
                 message = "This screen is under development"
             )
         }
-        
+
         composable(ERPDestinations.ATTENDANCE_REPORT_ROUTE) {
             PlaceholderScreen(
-                title = "Attendance Reports", 
+                title = "Attendance Reports",
                 message = "This screen is under development"
             )
         }
-        
+
         // Exam module
         composable(ERPDestinations.EXAM_DASHBOARD_ROUTE) {
             ExamScreen(
@@ -649,7 +650,7 @@ fun ERPNavHost(
                 navController = navController
             )
         }
-        
+
         // Exam List screen
         composable(ERPDestinations.EXAM_LIST_ROUTE) {
             PlaceholderScreen(
@@ -657,7 +658,7 @@ fun ERPNavHost(
                 message = "View of all scheduled exams"
             )
         }
-        
+
         // Create Exam screen
         composable(ERPDestinations.EXAM_CREATE_ROUTE) {
             PlaceholderScreen(
@@ -665,7 +666,7 @@ fun ERPNavHost(
                 message = "Form to create a new exam"
             )
         }
-        
+
         // Quiz Management screen
         composable(ERPDestinations.QUIZ_MANAGEMENT_ROUTE) {
             QuizManagementScreen(
@@ -673,7 +674,7 @@ fun ERPNavHost(
                 navController = navController
             )
         }
-        
+
         // Quiz Create/Edit screen
         composable(ERPDestinations.QUIZ_CREATE_ROUTE) {
             QuizCreateScreen(
@@ -681,7 +682,7 @@ fun ERPNavHost(
                 navController = navController
             )
         }
-        
+
         // Quiz Edit screen
         composable(
             route = "${ERPDestinations.QUIZ_EDIT_ROUTE}/{quizId}",
@@ -694,7 +695,7 @@ fun ERPNavHost(
                 quizId = quizId
             )
         }
-        
+
         // Quiz Detail screen
         composable(
             route = "${ERPDestinations.QUIZ_DETAIL_ROUTE}/{quizId}",
@@ -706,7 +707,7 @@ fun ERPNavHost(
                 message = "Details and questions for quiz ID: $quizId"
             )
         }
-        
+
         // Results Upload screen
         composable(ERPDestinations.RESULTS_UPLOAD_ROUTE) {
             ResultsUploadScreen(
@@ -714,7 +715,7 @@ fun ERPNavHost(
                 navController = navController
             )
         }
-        
+
         // Results View screen
         composable(ERPDestinations.RESULTS_VIEW_ROUTE) {
             ResultsViewScreen(
@@ -722,7 +723,7 @@ fun ERPNavHost(
                 navController = navController
             )
         }
-        
+
         // Result Detail screen
         composable(
             route = "${ERPDestinations.RESULT_DETAIL_ROUTE}/{resultId}",
@@ -734,7 +735,7 @@ fun ERPNavHost(
                 message = "Detailed view of result ID: $resultId"
             )
         }
-        
+
         // Inventory module navigation
         composable(ERPDestinations.INVENTORY_DASHBOARD_ROUTE) {
             InventoryDashboardScreen(
@@ -756,7 +757,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.PRODUCTS_ROUTE) {
             ProductsScreen(
                 viewModel = viewModel.inventoryViewModel,
@@ -768,7 +769,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(
             route = ERPDestinations.PRODUCT_DETAIL_ROUTE + "?productId={productId}",
             arguments = listOf(
@@ -788,7 +789,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.VENDORS_ROUTE) {
             VendorsScreen(
                 viewModel = viewModel.inventoryViewModel,
@@ -797,7 +798,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         // New routes
         composable(ERPDestinations.FINANCIAL_REPORTS_ROUTE) {
             FinancialReportsScreen(
@@ -807,7 +808,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(ERPDestinations.BUDGET_MANAGEMENT_ROUTE) {
             BudgetManagementScreen(
                 viewModel = viewModel.financeViewModel,

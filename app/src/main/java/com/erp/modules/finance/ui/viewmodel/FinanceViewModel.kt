@@ -54,28 +54,28 @@ class FinanceViewModel(
     // Transaction States
     private val _transactionsState = MutableStateFlow<TransactionsUiState>(TransactionsUiState.Loading)
     val transactionsState: StateFlow<TransactionsUiState> = _transactionsState
-    
+
     private val _transactionDetailState = MutableStateFlow<TransactionDetailState>(TransactionDetailState.Loading)
     val transactionDetailState: StateFlow<TransactionDetailState> = _transactionDetailState
-    
+
     // Invoice States
     private val _invoicesState = MutableStateFlow<InvoicesUiState>(InvoicesUiState.Loading)
     val invoicesState: StateFlow<InvoicesUiState> = _invoicesState
-    
+
     private val _invoiceDetailState = MutableStateFlow<InvoiceDetailState>(InvoiceDetailState.Loading)
     val invoiceDetailState: StateFlow<InvoiceDetailState> = _invoiceDetailState
-    
+
     // Fee States
     private val _feesState = MutableStateFlow<FeesUiState>(FeesUiState.Loading)
     val feesState: StateFlow<FeesUiState> = _feesState
-    
+
     private val _feeDetailState = MutableStateFlow<FeeDetailState>(FeeDetailState.Loading)
     val feeDetailState: StateFlow<FeeDetailState> = _feeDetailState
-    
+
     // Current editing items
     private val _currentTransaction = MutableStateFlow<Transaction?>(null)
     val currentTransaction: StateFlow<Transaction?> = _currentTransaction
-    
+
     private val _currentInvoice = MutableStateFlow<Invoice?>(null)
     val currentInvoice: StateFlow<Invoice?> = _currentInvoice
 
@@ -123,10 +123,10 @@ class FinanceViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-    
+
     private val _selectedTransaction = MutableStateFlow<Transaction?>(null)
     val selectedTransaction = _selectedTransaction.asStateFlow()
-    
+
     // Invoices
     val invoices = invoiceRepository.getAll()
         .stateIn(
@@ -134,17 +134,17 @@ class FinanceViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-    
+
     val overdueInvoices = invoiceRepository.getOverdueInvoices()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-    
+
     private val _selectedInvoice = MutableStateFlow<Invoice?>(null)
     val selectedInvoice = _selectedInvoice.asStateFlow()
-    
+
     // Transaction operations
     fun getTransactionsByDateRange(startDate: Date, endDate: Date): StateFlow<List<Transaction>> {
         return transactionRepository.getTransactionsByDateRange(startDate, endDate)
@@ -154,7 +154,7 @@ class FinanceViewModel(
                 initialValue = emptyList()
             )
     }
-    
+
     fun getTransactionsByType(type: TransactionType): StateFlow<List<Transaction>> {
         return transactionRepository.getTransactionsByType(type)
             .stateIn(
@@ -163,7 +163,7 @@ class FinanceViewModel(
                 initialValue = emptyList()
             )
     }
-    
+
     fun getTransactionsByStatus(status: TransactionStatus): StateFlow<List<Transaction>> {
         return transactionRepository.getTransactionsByStatus(status)
             .stateIn(
@@ -172,53 +172,53 @@ class FinanceViewModel(
                 initialValue = emptyList()
             )
     }
-    
+
     fun selectTransaction(transaction: Transaction) {
         _financeUiState.value = _financeUiState.value?.copy(
             selectedTransaction = transaction
         )
         _selectedTransaction.value = transaction
     }
-    
+
     fun clearSelectedTransaction() {
         _financeUiState.value = _financeUiState.value?.copy(
             selectedTransaction = null
         )
         _selectedTransaction.value = null
     }
-    
+
     fun saveTransaction(transaction: Transaction) {
         viewModelScope.launch {
             // For debugging with placeholder data, just reload without repository operations
             loadTransactions()
-            
+
             /* Uncomment when repository is working
             if (transaction.id.isEmpty()) {
                 transactionRepository.insert(transaction)
             } else {
                 transactionRepository.update(transaction)
             }
-            
+
             // Reload transactions after saving
             loadTransactions()
             */
         }
     }
-    
+
     fun deleteTransaction(transaction: Transaction) {
         viewModelScope.launch {
             // For debugging with placeholder data, just reload without repository operations
             loadTransactions()
-            
+
             /* Uncomment when repository is working
             transactionRepository.delete(transaction)
-            
+
             // Reload transactions after deleting
             loadTransactions()
             */
         }
     }
-    
+
     // Invoice operations
     fun getInvoicesByCustomer(customerId: String): StateFlow<List<Invoice>> {
         return invoiceRepository.getInvoicesByCustomer(customerId)
@@ -228,7 +228,7 @@ class FinanceViewModel(
                 initialValue = emptyList()
             )
     }
-    
+
     fun getInvoicesByStatus(status: InvoiceStatus): StateFlow<List<Invoice>> {
         return invoiceRepository.getInvoicesByStatus(status)
             .stateIn(
@@ -237,53 +237,53 @@ class FinanceViewModel(
                 initialValue = emptyList()
             )
     }
-    
+
     fun selectInvoice(invoice: Invoice) {
         _financeUiState.value = _financeUiState.value?.copy(
             selectedInvoice = invoice
         )
         _selectedInvoice.value = invoice
     }
-    
+
     fun clearSelectedInvoice() {
         _financeUiState.value = _financeUiState.value?.copy(
             selectedInvoice = null
         )
         _selectedInvoice.value = null
     }
-    
+
     fun saveInvoice(invoice: Invoice) {
         viewModelScope.launch {
             // For debugging with placeholder data, just reload without repository operations
             loadInvoices()
-            
+
             /* Uncomment when repository is working
             if (invoice.id.isEmpty()) {
                 invoiceRepository.insert(invoice)
             } else {
                 invoiceRepository.update(invoice)
             }
-            
+
             // Reload invoices after saving
             loadInvoices()
             */
         }
     }
-    
+
     fun deleteInvoice(invoice: Invoice) {
         viewModelScope.launch {
             // For debugging with placeholder data, just reload without repository operations
             loadInvoices()
-            
+
             /* Uncomment when repository is working
             invoiceRepository.delete(invoice)
-            
+
             // Reload invoices after deleting
             loadInvoices()
             */
         }
     }
-    
+
     // Load data functions
     fun loadTransactions() {
         viewModelScope.launch {
@@ -291,7 +291,7 @@ class FinanceViewModel(
                 transactionsState = TransactionsUiState.Loading
             )
             _transactionsState.value = TransactionsUiState.Loading
-            
+
             // Add placeholder data for debugging
             val placeholderTransactions = listOf(
                 Transaction(
@@ -324,11 +324,11 @@ class FinanceViewModel(
                 transactionsState = TransactionsUiState.Success(placeholderTransactions)
             )
             _transactionsState.value = TransactionsUiState.Success(placeholderTransactions)
-            
+
             // Comment out original flow for now
             /*
             transactionRepository.getAll()
-                .catch { error -> 
+                .catch { error ->
                     _transactionsState.value = TransactionsUiState.Error(error.message ?: "Unknown error")
                 }
                 .collect { transactions ->
@@ -341,14 +341,14 @@ class FinanceViewModel(
             */
         }
     }
-    
+
     fun loadInvoices() {
         viewModelScope.launch {
             _financeUiState.value = _financeUiState.value?.copy(
                 invoicesState = InvoicesUiState.Loading
             )
             _invoicesState.value = InvoicesUiState.Loading
-            
+
             // Add placeholder data for debugging
             val placeholderInvoices = listOf(
                 Invoice(
@@ -387,7 +387,7 @@ class FinanceViewModel(
                 invoicesState = InvoicesUiState.Success(placeholderInvoices)
             )
             _invoicesState.value = InvoicesUiState.Success(placeholderInvoices)
-            
+
             // Comment out original flow for now
             /*
             invoiceRepository.getAll()
@@ -404,7 +404,7 @@ class FinanceViewModel(
             */
         }
     }
-    
+
     // Fee functions
     fun loadFees() {
         viewModelScope.launch {
@@ -412,7 +412,7 @@ class FinanceViewModel(
                 feesState = FeesUiState.Loading
             )
             _feesState.value = FeesUiState.Loading
-            
+
             feeRepository.getAllFees()
                 .catch { error ->
                     _financeUiState.value = _financeUiState.value?.copy(
@@ -436,14 +436,14 @@ class FinanceViewModel(
                 }
         }
     }
-    
+
     fun loadFeesByStudent(studentId: String) {
         viewModelScope.launch {
             _financeUiState.value = _financeUiState.value?.copy(
                 feesState = FeesUiState.Loading
             )
             _feesState.value = FeesUiState.Loading
-            
+
             feeRepository.getFeesByStudent(studentId)
                 .catch { error ->
                     _financeUiState.value = _financeUiState.value?.copy(
@@ -467,14 +467,14 @@ class FinanceViewModel(
                 }
         }
     }
-    
+
     fun loadPendingFees() {
         viewModelScope.launch {
             _financeUiState.value = _financeUiState.value?.copy(
                 feesState = FeesUiState.Loading
             )
             _feesState.value = FeesUiState.Loading
-            
+
             feeRepository.getPendingFees()
                 .catch { error ->
                     _financeUiState.value = _financeUiState.value?.copy(
@@ -498,14 +498,14 @@ class FinanceViewModel(
                 }
         }
     }
-    
+
     fun getFeeDetail(id: String) {
         viewModelScope.launch {
             _financeUiState.value = _financeUiState.value?.copy(
                 feeDetailState = FeeDetailState.Loading
             )
             _feeDetailState.value = FeeDetailState.Loading
-            
+
             feeRepository.getFeeById(id)
                 .catch { error ->
                     _financeUiState.value = _financeUiState.value?.copy(
@@ -525,7 +525,7 @@ class FinanceViewModel(
                 }
         }
     }
-    
+
     fun createNewFee() {
         _financeUiState.value = _financeUiState.value?.copy(
             currentFee = Fee(
@@ -538,7 +538,7 @@ class FinanceViewModel(
             academicYear = "2023-2024"
         )
     }
-    
+
     fun saveFee(fee: Fee) {
         viewModelScope.launch {
             try {
@@ -553,7 +553,7 @@ class FinanceViewModel(
             }
         }
     }
-    
+
     fun recordFeePayment(fee: Fee, amount: Double, paymentMethod: String) {
         viewModelScope.launch {
             try {
@@ -569,9 +569,9 @@ class FinanceViewModel(
                     payeeId = fee.studentId,
                     referenceNumber = fee.id
                 )
-                
+
                 transactionRepository.insert(transaction)
-                
+
                 // Update fee status
                 val updatedFee = if (amount >= fee.amount) {
                     // Payment in full
@@ -590,9 +590,9 @@ class FinanceViewModel(
                         transactionId = transaction.id
                     )
                 }
-                
+
                 feeRepository.updateFee(updatedFee)
-                
+
                 // Refresh state
                 loadFees()
                 loadTransactions()
@@ -602,7 +602,7 @@ class FinanceViewModel(
             }
         }
     }
-    
+
     // Transaction Detail functions
     fun getTransactionDetail(id: String) {
         viewModelScope.launch {
@@ -610,7 +610,7 @@ class FinanceViewModel(
                 transactionDetailState = TransactionDetailState.Loading
             )
             _transactionDetailState.value = TransactionDetailState.Loading
-            
+
             try {
                 // Mocking a transaction fetch for now
                 val transaction = Transaction(
@@ -636,7 +636,7 @@ class FinanceViewModel(
             }
         }
     }
-    
+
     fun createNewTransaction() {
         val currentTransaction = Transaction(
             id = UUID.randomUUID().toString(),
@@ -653,7 +653,7 @@ class FinanceViewModel(
         )
         _transactionDetailState.value = TransactionDetailState.Success(_currentTransaction.value!!)
     }
-    
+
     // Invoice Detail functions
     fun getInvoiceDetail(id: String) {
         viewModelScope.launch {
@@ -661,7 +661,7 @@ class FinanceViewModel(
                 invoiceDetailState = InvoiceDetailState.Loading
             )
             _invoiceDetailState.value = InvoiceDetailState.Loading
-            
+
             try {
                 // Mocking an invoice fetch for now
                 val invoice = Invoice(
@@ -689,7 +689,7 @@ class FinanceViewModel(
             }
         }
     }
-    
+
     fun createNewInvoice() {
         val currentInvoice = Invoice(
             id = UUID.randomUUID().toString(),

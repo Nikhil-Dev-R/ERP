@@ -15,11 +15,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.erp.modules.exam.viewmodel.ExamViewModel
 import com.erp.modules.exam.model.ExamResult
 import com.erp.modules.exam.model.ResultStatus
-import kotlinx.coroutines.launch
 import com.erp.core.navigation.ERPDestinations
+import com.erp.modules.exam.viewmodel.ExamViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

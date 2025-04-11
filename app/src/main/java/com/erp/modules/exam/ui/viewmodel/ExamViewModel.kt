@@ -21,19 +21,19 @@ class ExamViewModel(
     // UI state for exams list
     private val _examsState = MutableStateFlow<ExamsUiState>(ExamsUiState.Loading)
     val examsState: StateFlow<ExamsUiState> = _examsState
-    
+
     // UI state for exam details
     private val _examDetailState = MutableStateFlow<ExamDetailState>(ExamDetailState.Loading)
     val examDetailState: StateFlow<ExamDetailState> = _examDetailState
-    
+
     // UI state for results
     private val _resultsState = MutableStateFlow<ResultsUiState>(ResultsUiState.Loading)
     val resultsState: StateFlow<ResultsUiState> = _resultsState
-    
+
     // UI state for student results
     private val _studentResultsState = MutableStateFlow<StudentResultsUiState>(StudentResultsUiState.Loading)
     val studentResultsState: StateFlow<StudentResultsUiState> = _studentResultsState
-    
+
     // Current editing exam
     private val _currentExam = MutableStateFlow<Exam?>(null)
     val currentExam: StateFlow<Exam?> = _currentExam
@@ -41,36 +41,36 @@ class ExamViewModel(
     // Exams list
     private val _exams = MutableStateFlow<List<Exam>>(emptyList())
     val exams: StateFlow<List<Exam>> = _exams
-    
+
     // Results list
     private val _examResults = MutableStateFlow<List<ExamResult>>(emptyList())
     val examResults: StateFlow<List<ExamResult>> = _examResults
-    
+
     // Quizzes list
     private val _quizzes = MutableStateFlow<List<Quiz>>(emptyList())
     val quizzes: StateFlow<List<Quiz>> = _quizzes
-    
+
     // Subjects list (mock data for now)
     private val _subjects = MutableStateFlow<List<Any>>(emptyList())
     val subjects: StateFlow<List<Any>> = _subjects
-    
+
     // Initialize with mock data
     init {
         loadMockData()
         loadAllQuizzes()
     }
-    
+
     private fun loadMockData() {
         val calendar = Calendar.getInstance()
-        
+
         // Set start date to yesterday
         calendar.add(Calendar.DAY_OF_MONTH, -1)
         val startDate = calendar.time
-        
+
         // Set end date to tomorrow
         calendar.add(Calendar.DAY_OF_MONTH, 2)
         val endDate = calendar.time
-        
+
         // Create mock exams
         val mockExams = listOf(
             Exam(
@@ -116,10 +116,10 @@ class ExamViewModel(
                 status = ExamStatus.SCHEDULED
             )
         )
-        
+
         _examsState.value = ExamsUiState.Success(mockExams)
         _exams.value = mockExams
-        
+
         // Create mock subjects
         val mockSubjects = listOf(
             "MATH101" to "Mathematics",
@@ -127,7 +127,7 @@ class ExamViewModel(
             "SCI101" to "Science"
         )
         _subjects.value = mockSubjects
-        
+
         // Create mock students
         val mockStudents = listOf(
             Student(
@@ -158,7 +158,7 @@ class ExamViewModel(
                 id = "student3"
             }
         )
-        
+
         // Create mock results for English Quiz (exam2)
         val mockResults = mockStudents.map { student ->
             ExamResult(
@@ -176,10 +176,10 @@ class ExamViewModel(
                 id = UUID.randomUUID().toString()
             }
         }
-        
+
         _resultsState.value = ResultsUiState.Success(mockResults)
         _examResults.value = mockResults
-        
+
         // Create mock quizzes
         val mockQuizzes = listOf(
             Quiz(
@@ -218,22 +218,32 @@ class ExamViewModel(
                 description = "Parts of speech quiz",
                 subjectId = "ENG101",
                 gradeLevel = "9",
-                status = QuizStatus.DRAFT
+                status = QuizStatus.DRAFT,
+                totalMarks = TODO(),
+                passingMarks = TODO(),
+                duration = TODO(),
+                startTime = TODO(),
+                endTime = TODO(),
+                instructions = TODO(),
+                createdBy = TODO(),
+                isRandomized = TODO(),
+                showResultImmediately = TODO(),
+                questions = TODO()
             )
         )
-        
+
         _quizzes.value = mockQuizzes
     }
-    
+
     // Exam functions
     fun loadAllExams() {
         viewModelScope.launch {
             _examsState.value = ExamsUiState.Loading
-            
+
             // In a real app, we would fetch from repository
             // For now, just show the mock data again
             val exams = (_examsState.value as? ExamsUiState.Success)?.exams
-            
+
             if (exams != null) {
                 _examsState.value = ExamsUiState.Success(exams)
                 _exams.value = exams
@@ -242,17 +252,17 @@ class ExamViewModel(
             }
         }
     }
-    
+
     fun getExamDetail(id: String) {
         viewModelScope.launch {
             _examDetailState.value = ExamDetailState.Loading
-            
+
             val exam = (_examsState.value as? ExamsUiState.Success)?.exams?.find { it.id == id }
-            
+
             if (exam != null) {
                 _examDetailState.value = ExamDetailState.Success(exam)
                 _currentExam.value = exam
-                
+
                 // Also load results for this exam
                 loadResultsByExam(id)
             } else {
@@ -260,7 +270,7 @@ class ExamViewModel(
             }
         }
     }
-    
+
     fun createNewExam() {
         _currentExam.value = Exam(
             academicYear = "2023-2024",
@@ -268,39 +278,39 @@ class ExamViewModel(
             endDate = Date()
         )
     }
-    
+
     fun saveExam(exam: Exam) {
         viewModelScope.launch {
             // In a real app, we would save to repository
             val currentExams = (_examsState.value as? ExamsUiState.Success)?.exams ?: emptyList()
             val updatedExams = currentExams.toMutableList()
-            
+
             val existingIndex = updatedExams.indexOfFirst { it.id == exam.id }
             if (existingIndex >= 0) {
                 updatedExams[existingIndex] = exam
             } else {
                 updatedExams.add(exam)
             }
-            
+
             _examsState.value = ExamsUiState.Success(updatedExams)
             _exams.value = updatedExams
-            
+
             // Update the current exam
             if (_currentExam.value?.id == exam.id) {
                 _currentExam.value = exam
             }
         }
     }
-    
+
     // Result functions
     fun loadResultsByExam(examId: String) {
         viewModelScope.launch {
             _resultsState.value = ResultsUiState.Loading
-            
+
             // In a real app, we would fetch from repository
             val results = (_resultsState.value as? ResultsUiState.Success)?.results
                 ?.filter { it.examId == examId }
-                
+
             if (results != null && results.isNotEmpty()) {
                 _resultsState.value = ResultsUiState.Success(results)
                 _examResults.value = results
@@ -310,15 +320,15 @@ class ExamViewModel(
             }
         }
     }
-    
+
     fun loadResultsForStudent(studentId: String) {
         viewModelScope.launch {
             _studentResultsState.value = StudentResultsUiState.Loading
-            
+
             // In a real app, we would fetch from repository
             val results = (_resultsState.value as? ResultsUiState.Success)?.results
                 ?.filter { it.studentId == studentId }
-                
+
             if (results != null && results.isNotEmpty()) {
                 _studentResultsState.value = StudentResultsUiState.Success(results)
             } else {
@@ -326,25 +336,25 @@ class ExamViewModel(
             }
         }
     }
-    
+
     fun saveResult(result: ExamResult) {
         viewModelScope.launch {
             // In a real app, we would save to repository
             val currentResults = (_resultsState.value as? ResultsUiState.Success)?.results ?: emptyList()
             val updatedResults = currentResults.toMutableList()
-            
+
             val existingIndex = updatedResults.indexOfFirst { it.id == result.id }
             if (existingIndex >= 0) {
                 updatedResults[existingIndex] = result
             } else {
                 updatedResults.add(result)
             }
-            
+
             _resultsState.value = ResultsUiState.Success(updatedResults)
             _examResults.value = updatedResults
         }
     }
-    
+
     // Quiz functions
     fun loadAllQuizzes() {
         viewModelScope.launch {
@@ -359,14 +369,14 @@ class ExamViewModel(
             }
         }
     }
-    
+
     fun searchQuizzes(query: String) {
         viewModelScope.launch {
             if (query.isBlank()) {
                 loadAllQuizzes()
                 return@launch
             }
-            
+
             try {
                 if (quizRepository != null) {
                     val quizzes = quizRepository.searchQuizzes(query).first()
@@ -375,7 +385,7 @@ class ExamViewModel(
                     // Filter mock data
                     val filteredQuizzes = _quizzes.value.filter {
                         it.title.contains(query, ignoreCase = true) ||
-                        it.description.contains(query, ignoreCase = true)
+                                it.description.contains(query, ignoreCase = true)
                     }
                     _quizzes.value = filteredQuizzes
                 }
@@ -384,11 +394,11 @@ class ExamViewModel(
             }
         }
     }
-    
+
     suspend fun getQuizById(id: String): Quiz? {
         return quizRepository?.getQuizById(id) ?: _quizzes.value.find { it.id == id }
     }
-    
+
     fun saveQuiz(quiz: Quiz) {
         viewModelScope.launch {
             try {
@@ -403,13 +413,13 @@ class ExamViewModel(
                     // Update mock data
                     val currentQuizzes = _quizzes.value.toMutableList()
                     val existingIndex = currentQuizzes.indexOfFirst { it.id == quiz.id }
-                    
+
                     if (existingIndex >= 0) {
                         currentQuizzes[existingIndex] = quiz
                     } else {
                         currentQuizzes.add(quiz)
                     }
-                    
+
                     _quizzes.value = currentQuizzes
                 }
             } catch (e: Exception) {
@@ -417,7 +427,7 @@ class ExamViewModel(
             }
         }
     }
-    
+
     fun deleteQuiz(quiz: Quiz) {
         viewModelScope.launch {
             try {
@@ -434,12 +444,12 @@ class ExamViewModel(
             }
         }
     }
-    
+
     fun publishQuiz(quiz: Quiz) {
         viewModelScope.launch {
             try {
                 val updatedQuiz = quiz.copy(status = QuizStatus.PUBLISHED)
-                
+
                 if (quizRepository != null) {
                     quizRepository.publishQuiz(updatedQuiz)
                     loadAllQuizzes()
@@ -447,11 +457,11 @@ class ExamViewModel(
                     // Update mock data
                     val currentQuizzes = _quizzes.value.toMutableList()
                     val existingIndex = currentQuizzes.indexOfFirst { it.id == quiz.id }
-                    
+
                     if (existingIndex >= 0) {
                         currentQuizzes[existingIndex] = updatedQuiz
                     }
-                    
+
                     _quizzes.value = currentQuizzes
                 }
             } catch (e: Exception) {
@@ -459,13 +469,13 @@ class ExamViewModel(
             }
         }
     }
-    
+
     // Utility functions
     fun getCurrentUserId(): String {
         // In a real app, this would come from authentication
         return "teacher1"
     }
-    
+
     fun generateResultTemplate(exam: Exam) {
         // In a real app, this would generate and download a template file
         // For now, this is just a placeholder

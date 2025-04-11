@@ -82,7 +82,7 @@ fun HomeScreen(
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
+
             // First row: Student and Academic Management
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -94,7 +94,7 @@ fun HomeScreen(
                     onClick = onNavigateToStudents,
                     modifier = Modifier.weight(1f)
                 )
-                
+
                 ModuleCard(
                     title = "Academics",
                     icon = Icons.AutoMirrored.Filled.MenuBook,
@@ -102,7 +102,7 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
-            
+
             // Second row: Attendance and Exams
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -114,7 +114,7 @@ fun HomeScreen(
                     onClick = onNavigateToAttendance,
                     modifier = Modifier.weight(1f)
                 )
-                
+
                 ModuleCard(
                     title = "Exams & Results",
                     icon = Icons.AutoMirrored.Filled.Assignment,
@@ -122,7 +122,7 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
-            
+
             // Third row: HR (Teachers) and Finance
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -134,7 +134,7 @@ fun HomeScreen(
                     onClick = onNavigateToHR,
                     modifier = Modifier.weight(1f)
                 )
-                
+
                 ModuleCard(
                     title = "Finance",
                     icon = Icons.Default.AttachMoney,
@@ -142,7 +142,7 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
-            
+
             // Fourth row: Inventory and Fees
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -154,7 +154,7 @@ fun HomeScreen(
                     onClick = onNavigateToInventory,
                     modifier = Modifier.weight(1f)
                 )
-                
+
                 ModuleCard(
                     title = "Fee Management",
                     icon = Icons.Default.AttachMoney,
@@ -196,9 +196,9 @@ fun ModuleCard(
                 modifier = Modifier.height(40.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
@@ -206,4 +206,4 @@ fun ModuleCard(
             )
         }
     }
-} 
+}

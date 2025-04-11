@@ -62,22 +62,22 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings
 import kotlin.reflect.KClass
 
 class MainActivity : ComponentActivity() {
-    
+
     // Main ViewModel that holds all module ViewModels
     private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Enable edge-to-edge display
         enableEdgeToEdge()
-        
+
         // Initialize Firebase
         initializeFirebase()
-        
+
         // Initialize repositories and view models
         createRepositories()
-        
+
         setContent {
             ERPTheme {
                 Surface(
@@ -90,12 +90,12 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    
+
     // Initialize Firebase with proper settings
     private fun initializeFirebase() {
         // Let the application handle the Firebase initialization
         val app = applicationContext as ERPApplication
-        
+
         // Log connection status
         Log.d("MainActivity", "Checking Firebase connection status")
     }
@@ -105,26 +105,26 @@ class MainActivity : ComponentActivity() {
         val application = applicationContext as ERPApplication
         val database = application.database
         val authManager = application.authManager
-        
+
         // Initialize Firebase for the three main tables (Students, Teachers & Staff, Finance)
-        
+
         // 1. Students Table
         val studentRepository = StudentRepository(
-            database.studentDao(), 
+            database.studentDao(),
             createFirebaseService("students", Student::class)
         )
-        
+
         // 2. Teachers & Staff Tables
         val teacherRepository = TeacherRepository(
             database.teacherDao(),
             createFirebaseService("teachers", Teacher::class)
         )
-        
+
         val staffRepository = StaffRepository(
             database.staffDao(),
             createFirebaseService("staff", Staff::class)
         )
-        
+
         // 3. Finance Tables
         val transactionRepository = TransactionRepository(
             database.transactionDao(),
@@ -138,19 +138,19 @@ class MainActivity : ComponentActivity() {
             database.financeFeeDao(),
             createFirebaseService("fees", Fee::class)
         )
-        
+
         // 4. Fee Module Repository
         val feeModuleRepository = com.erp.modules.fee.data.repository.FeeRepository(
             database.feeDao(),
             createFirebaseService("fee_module_fees", com.erp.modules.fee.data.model.Fee::class)
         )
-        
+
         // Create academics repositories with properly typed FirebaseService
         val classRoomFirebaseService = createFirebaseService("classrooms", ClassRoom::class)
         val subjectFirebaseService = createFirebaseService("subjects", Subject::class)
         val timeTableEntryFirebaseService = createFirebaseService("timetable_entries", TimeTableEntry::class)
         val attachmentFirebaseService = createFirebaseService("subject_attachments", SubjectAttachment::class)
-        
+
         // Use a composite pattern or delegate to a service that can handle all three types
         val academicsRepository = AcademicsRepository(
             database.classRoomDao(),
@@ -169,7 +169,7 @@ class MainActivity : ComponentActivity() {
             createFirebaseService<Exam>("exams", Exam::class),
             createFirebaseService<ExamResult>("results", ExamResult::class)
         )
-        
+
         // Create individual repositories for HR module
         val employeeRepository = EmployeeRepository(
             database.employeeDao(),
@@ -182,7 +182,7 @@ class MainActivity : ComponentActivity() {
         val salaryRepository = SalaryRepository(
             database.salaryDao()
         )
-        
+
         // Create individual repositories for Inventory module
         val productRepository = ProductRepository(
             database.productDao(),
@@ -192,7 +192,7 @@ class MainActivity : ComponentActivity() {
             database.vendorDao(),
             createFirebaseService("vendors", Vendor::class)
         )
-        
+
         // Initialize ViewModels
         val studentViewModel = StudentViewModel(studentRepository)
         val academicsViewModel = AcademicsViewModel(academicsRepository)
@@ -220,18 +220,18 @@ class MainActivity : ComponentActivity() {
     companion object {
         // Create a typed FirebaseService - accessible from companion object
         fun <T : BaseEntity> createFirebaseService(
-            collectionPath: String, 
+            collectionPath: String,
             entityClass: KClass<T>
         ): FirebaseService<T> {
             // Add log for debugging
             Log.d("MainActivity", "Creating FirebaseService for collection: $collectionPath")
-            
+
             // Ensure Firebase is already initialized before creating FirebaseService
             // We don't initialize here, as it should be initialized by the Application class
             if (FirebaseApp.getApps(FirebaseApp.getInstance().applicationContext).isEmpty()) {
                 Log.w("MainActivity", "Firebase not initialized!")
             }
-            
+
             return FirebaseService(entityClass, collectionPath)
         }
     }

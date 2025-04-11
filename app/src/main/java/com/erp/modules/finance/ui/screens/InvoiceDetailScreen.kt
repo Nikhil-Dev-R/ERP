@@ -279,14 +279,14 @@ fun InvoiceDetailScreen(
                                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                                 modifier = Modifier
                                     .fillMaxWidth()
-//                                    .menuAnchor()
+                                    .menuAnchor()
                             )
 
                             ExposedDropdownMenu(
                                 expanded = isStatusExpanded,
                                 onDismissRequest = { isStatusExpanded = false }
                             ) {
-                                InvoiceStatus.entries.forEach { invoiceStatus ->
+                                InvoiceStatus.values().forEach { invoiceStatus ->
                                     DropdownMenuItem(
                                         text = { Text(invoiceStatus.name) },
                                         onClick = {

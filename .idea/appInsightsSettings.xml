@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.erp" />
-                  <option name="mobileSdkAppId" value="1:290265458303:android:e9171c4e41aa7584b8014a" />
-                  <option name="projectId" value="school-f7375" />
-                  <option name="projectNumber" value="290265458303" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

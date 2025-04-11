@@ -14,7 +14,7 @@ import com.erp.modules.student.ui.viewmodel.StudentViewModel
 class MainViewModel(
     val authManager: AuthManager,
     val studentViewModel: StudentViewModel,
-    val academicsViewModel: AcademicsViewModel, 
+    val academicsViewModel: AcademicsViewModel,
     val attendanceViewModel: AttendanceViewModel,
     val examViewModel: ExamViewModel,
     val financeViewModel: FinanceViewModel,

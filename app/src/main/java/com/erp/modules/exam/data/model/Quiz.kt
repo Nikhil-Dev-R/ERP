@@ -10,7 +10,7 @@ import java.util.UUID
 data class Quiz(
     @PrimaryKey
     override var id: String = UUID.randomUUID().toString(),
-    
+
     val title: String = "",
     val description: String = "",
     val subjectId: String = "",
@@ -19,7 +19,7 @@ data class Quiz(
     val passingMarks: Int = 35,
     val duration: Int = 30, // in minutes
     val startTime: Date? = null,
-    val endTime: Date? = null,
+    val endTime: Date,
     val instructions: String = "",
     val createdBy: String = "",
     val status: QuizStatus = QuizStatus.DRAFT,

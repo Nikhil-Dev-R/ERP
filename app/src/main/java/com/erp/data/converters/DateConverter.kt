@@ -17,22 +17,22 @@ class DateConverter {
     fun dateToTimestamp(date: Date?): Long? {
         return date?.time
     }
-    
+
     @TypeConverter
     fun fromBigDecimal(value: BigDecimal?): String? {
         return value?.toString()
     }
-    
+
     @TypeConverter
     fun toBigDecimal(value: String?): BigDecimal? {
         return value?.let { BigDecimal(it) }
     }
-    
+
     @TypeConverter
     fun fromInvoiceItemList(value: List<InvoiceItem>?): String? {
         return Gson().toJson(value)
     }
-    
+
     @TypeConverter
     fun toInvoiceItemList(value: String?): List<InvoiceItem>? {
         if (value == null) return emptyList()

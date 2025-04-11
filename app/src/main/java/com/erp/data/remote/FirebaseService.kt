@@ -29,7 +29,7 @@ class FirebaseService<T : BaseEntity>(
 ) {
     private val db: FirebaseFirestore = Firebase.firestore
     private val collection = db.collection(collectionPath)
-    
+
     suspend fun getAll(): List<T> {
         return try {
             collection.get().await().documents.mapNotNull { doc ->
@@ -47,7 +47,7 @@ class FirebaseService<T : BaseEntity>(
             emptyList()
         }
     }
-    
+
     suspend fun getById(id: String): T? {
         return try {
             val document = collection.document(id).get().await()
@@ -63,7 +63,7 @@ class FirebaseService<T : BaseEntity>(
             null
         }
     }
-    
+
     suspend fun insert(item: T): String {
         val TAG = "FirebaseService"
         return try {
@@ -72,19 +72,19 @@ class FirebaseService<T : BaseEntity>(
                 Log.e(TAG, "Error inserting document: Firebase Firestore not available", Exception("Firebase not initialized"))
                 return ""
             }
-            
+
             if (item.id.isNullOrEmpty()) {
                 Log.d(TAG, "Inserting new document to collection: $collectionPath")
                 val docRef = collection.add(item).await()
                 val newId = docRef.id
-                
+
                 // Update the local item with the new ID
                 item.id = newId
                 Log.d(TAG, "Document successfully inserted with ID: $newId in collection: $collectionPath")
-                
+
                 // Update the document with its ID to ensure consistency
                 collection.document(newId).set(item).await()
-                
+
                 return newId
             } else {
                 Log.d(TAG, "Inserting document with existing ID ${item.id} to collection: $collectionPath")
@@ -97,7 +97,7 @@ class FirebaseService<T : BaseEntity>(
             ""
         }
     }
-    
+
     suspend fun update(item: T): Boolean {
         val TAG = "FirebaseService"
         return try {
@@ -106,12 +106,12 @@ class FirebaseService<T : BaseEntity>(
                 Log.e(TAG, "Error updating document: Firebase Firestore not available", Exception("Firebase not initialized"))
                 return false
             }
-            
+
             if (item.id.isNullOrEmpty()) {
                 Log.e(TAG, "Cannot update document with empty ID in collection: $collectionPath")
                 return false
             }
-            
+
             Log.d(TAG, "Updating document with ID ${item.id} in collection: $collectionPath")
             collection.document(item.id!!).set(item).await()
             Log.d(TAG, "Document successfully updated with ID: ${item.id} in collection: $collectionPath")
@@ -121,7 +121,7 @@ class FirebaseService<T : BaseEntity>(
             false
         }
     }
-    
+
     suspend fun delete(id: String): Boolean {
         return try {
             collection.document(id).delete().await()
@@ -131,128 +131,128 @@ class FirebaseService<T : BaseEntity>(
             false
         }
     }
-    
+
     // Attendance operations
     suspend fun saveAttendance(attendance: Attendance) {
         db.collection("attendance").document(attendance.id).set(attendance)
     }
-    
+
     suspend fun updateAttendance(attendance: Attendance) {
         db.collection("attendance").document(attendance.id).set(attendance)
     }
-    
+
     suspend fun deleteAttendance(id: String) {
         db.collection("attendance").document(id).delete()
     }
-    
+
     suspend fun getAllAttendance(): List<Attendance> {
         val snapshot = db.collection("attendance").get().await()
         return snapshot.toObjects(Attendance::class.java)
     }
-    
+
     // Academics operations - ClassRooms
     suspend fun saveClassRoom(classRoom: ClassRoom) {
         db.collection("classrooms").document(classRoom.id).set(classRoom)
     }
-    
+
     suspend fun updateClassRoom(classRoom: ClassRoom) {
         db.collection("classrooms").document(classRoom.id).set(classRoom)
     }
-    
+
     suspend fun deleteClassRoom(id: String) {
         db.collection("classrooms").document(id).delete()
     }
-    
+
     suspend fun getAllClassRooms(): List<ClassRoom> {
         val snapshot = db.collection("classrooms").get().await()
         return snapshot.toObjects(ClassRoom::class.java)
     }
-    
+
     // Academics operations - Subjects
     suspend fun saveSubject(subject: Subject) {
         db.collection("subjects").document(subject.id).set(subject)
     }
-    
+
     suspend fun updateSubject(subject: Subject) {
         db.collection("subjects").document(subject.id).set(subject)
     }
-    
+
     suspend fun deleteSubject(id: String) {
         db.collection("subjects").document(id).delete()
     }
-    
+
     suspend fun getAllSubjects(): List<Subject> {
         val snapshot = db.collection("subjects").get().await()
         return snapshot.toObjects(Subject::class.java)
     }
-    
+
     // Academics operations - TimeTableEntries
     suspend fun saveTimeTableEntry(timeTableEntry: TimeTableEntry) {
         db.collection("timetable_entries").document(timeTableEntry.id).set(timeTableEntry)
     }
-    
+
     suspend fun updateTimeTableEntry(timeTableEntry: TimeTableEntry) {
         db.collection("timetable_entries").document(timeTableEntry.id).set(timeTableEntry)
     }
-    
+
     suspend fun deleteTimeTableEntry(id: String) {
         db.collection("timetable_entries").document(id).delete()
     }
-    
+
     suspend fun getAllTimeTableEntries(): List<TimeTableEntry> {
         val snapshot = db.collection("timetable_entries").get().await()
         return snapshot.toObjects(TimeTableEntry::class.java)
     }
-    
+
     // Exam operations
     suspend fun saveExam(exam: Exam) {
         db.collection("exams").document(exam.id).set(exam)
     }
-    
+
     suspend fun updateExam(exam: Exam) {
         db.collection("exams").document(exam.id).set(exam)
     }
-    
+
     suspend fun deleteExam(id: String) {
         db.collection("exams").document(id).delete()
     }
-    
+
     suspend fun getAllExams(): List<Exam> {
         val snapshot = db.collection("exams").get().await()
         return snapshot.toObjects(Exam::class.java)
     }
-    
+
     // Exam Result operations
     suspend fun saveResult(result: ExamResult) {
         db.collection("results").document(result.id).set(result)
     }
-    
+
     suspend fun updateResult(result: ExamResult) {
         db.collection("results").document(result.id).set(result)
     }
-    
+
     suspend fun deleteResult(id: String) {
         db.collection("results").document(id).delete()
     }
-    
+
     suspend fun getAllResults(): List<ExamResult> {
         val snapshot = db.collection("results").get().await()
         return snapshot.toObjects(ExamResult::class.java)
     }
-    
+
     // Academics operations - SubjectAttachments
     suspend fun saveAttachment(attachment: SubjectAttachment) {
         db.collection("subject_attachments").document(attachment.id).set(attachment)
     }
-    
+
     suspend fun updateAttachment(attachment: SubjectAttachment) {
         db.collection("subject_attachments").document(attachment.id).set(attachment)
     }
-    
+
     suspend fun deleteAttachment(id: String) {
         db.collection("subject_attachments").document(id).delete()
     }
-    
+
     suspend fun getAllAttachments(): List<SubjectAttachment> {
         val snapshot = db.collection("subject_attachments").get().await()
         return snapshot.toObjects(SubjectAttachment::class.java)

@@ -35,7 +35,7 @@ fun QuizCreateScreen(
     val subjects by viewModel.subjects.collectAsState(initial = emptyList())
     var currentQuestion by remember { mutableStateOf<QuizQuestion?>(null) }
     var isQuestionDialogVisible by remember { mutableStateOf(false) }
-    
+
     // Load quiz if editing
     LaunchedEffect(quizId) {
         if (isEditing && quizId != null) {
@@ -44,7 +44,7 @@ fun QuizCreateScreen(
             }
         }
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -87,7 +87,7 @@ fun QuizCreateScreen(
                             text = "Quiz Details",
                             style = MaterialTheme.typography.titleLarge
                         )
-                        
+
                         // Title
                         OutlinedTextField(
                             value = quiz.title,
@@ -96,7 +96,7 @@ fun QuizCreateScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
-                        
+
                         // Description
                         OutlinedTextField(
                             value = quiz.description,
@@ -106,7 +106,7 @@ fun QuizCreateScreen(
                             minLines = 2,
                             maxLines = 4
                         )
-                        
+
                         // Subject dropdown
                         SubjectDropdown(
                             subjects = subjects,
@@ -115,7 +115,7 @@ fun QuizCreateScreen(
                                 quiz = quiz.copy(subjectId = subjectId)
                             }
                         )
-                        
+
                         // Grade Level
                         OutlinedTextField(
                             value = quiz.gradeLevel,
@@ -124,7 +124,7 @@ fun QuizCreateScreen(
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true
                         )
-                        
+
                         // Marks
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -132,7 +132,7 @@ fun QuizCreateScreen(
                         ) {
                             OutlinedTextField(
                                 value = quiz.totalMarks.toString(),
-                                onValueChange = { 
+                                onValueChange = {
                                     val marks = it.toIntOrNull() ?: 0
                                     quiz = quiz.copy(totalMarks = marks)
                                 },
@@ -143,10 +143,10 @@ fun QuizCreateScreen(
                                 ),
                                 singleLine = true
                             )
-                            
+
                             OutlinedTextField(
                                 value = quiz.passingMarks.toString(),
-                                onValueChange = { 
+                                onValueChange = {
                                     val marks = it.toIntOrNull() ?: 0
                                     quiz = quiz.copy(passingMarks = marks)
                                 },
@@ -158,11 +158,11 @@ fun QuizCreateScreen(
                                 singleLine = true
                             )
                         }
-                        
+
                         // Duration
                         OutlinedTextField(
                             value = quiz.duration.toString(),
-                            onValueChange = { 
+                            onValueChange = {
                                 val duration = it.toIntOrNull() ?: 0
                                 quiz = quiz.copy(duration = duration)
                             },
@@ -173,7 +173,7 @@ fun QuizCreateScreen(
                             ),
                             singleLine = true
                         )
-                        
+
                         // Quiz settings
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -183,13 +183,13 @@ fun QuizCreateScreen(
                                 checked = quiz.isRandomized,
                                 onCheckedChange = { quiz = quiz.copy(isRandomized = it) }
                             )
-                            
+
                             Text(
                                 text = "Randomize Questions",
                                 modifier = Modifier.padding(start = 8.dp)
                             )
                         }
-                        
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
@@ -198,13 +198,13 @@ fun QuizCreateScreen(
                                 checked = quiz.showResultImmediately,
                                 onCheckedChange = { quiz = quiz.copy(showResultImmediately = it) }
                             )
-                            
+
                             Text(
                                 text = "Show Results Immediately",
                                 modifier = Modifier.padding(start = 8.dp)
                             )
                         }
-                        
+
                         // Instructions
                         OutlinedTextField(
                             value = quiz.instructions,
@@ -217,7 +217,7 @@ fun QuizCreateScreen(
                     }
                 }
             }
-            
+
             // Questions section
             item {
                 Card(
@@ -238,7 +238,7 @@ fun QuizCreateScreen(
                                 text = "Questions (${quiz.questions.size})",
                                 style = MaterialTheme.typography.titleLarge
                             )
-                            
+
                             Button(
                                 onClick = {
                                     currentQuestion = null
@@ -253,7 +253,7 @@ fun QuizCreateScreen(
                                 Text("Add Question")
                             }
                         }
-                        
+
                         if (quiz.questions.isEmpty()) {
                             EmptyQuestionsState()
                         } else {
@@ -273,7 +273,7 @@ fun QuizCreateScreen(
                     }
                 }
             }
-            
+
             // Scheduling section
             item {
                 Card(
@@ -289,9 +289,9 @@ fun QuizCreateScreen(
                             text = "Quiz Schedule",
                             style = MaterialTheme.typography.titleLarge
                         )
-                        
+
                         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                        
+
                         // Start time
                         Button(
                             onClick = {
@@ -307,13 +307,13 @@ fun QuizCreateScreen(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Text(
-                                if (quiz.startTime > 0) 
-                                    "Start: ${dateFormat.format(Date(quiz.startTime))}" 
-                                else 
+                                if (quiz.startTime > 0)
+                                    "Start: ${dateFormat.format(Date(quiz.startTime))}"
+                                else
                                     "Set Start Time"
                             )
                         }
-                        
+
                         // End time
                         Button(
                             onClick = {
@@ -329,9 +329,9 @@ fun QuizCreateScreen(
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Text(
-                                if (quiz.endTime > 0) 
-                                    "End: ${dateFormat.format(Date(quiz.endTime))}" 
-                                else 
+                                if (quiz.endTime > 0)
+                                    "End: ${dateFormat.format(Date(quiz.endTime))}"
+                                else
                                     "Set End Time"
                             )
                         }
@@ -339,7 +339,7 @@ fun QuizCreateScreen(
                 }
             }
         }
-        
+
         // Question dialog
         if (isQuestionDialogVisible) {
             QuestionDialog(
@@ -374,7 +374,7 @@ fun SubjectDropdown(
     onSubjectSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    
+
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -399,7 +399,7 @@ fun SubjectDropdown(
                 .matchParentSize()
                 .clickable { expanded = true }
         )
-        
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
@@ -483,7 +483,7 @@ fun QuestionListItem(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(end = 8.dp)
             )
-            
+
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -491,14 +491,14 @@ fun QuestionListItem(
                     text = question.questionText,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                
+
                 Text(
                     text = "Type: ${question.questionType.name}, Marks: ${question.marks}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            
+
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
@@ -522,7 +522,7 @@ fun QuestionDialog(
     var questionType by remember { mutableStateOf(question?.questionType ?: QuestionType.MULTIPLE_CHOICE) }
     var marks by remember { mutableStateOf(question?.marks?.toString() ?: "1") }
     var options by remember { mutableStateOf(question?.options ?: emptyList()) }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (isEditing) "Edit Question" else "Add Question") },
@@ -542,13 +542,13 @@ fun QuestionDialog(
                     minLines = 2,
                     maxLines = 4
                 )
-                
+
                 // Question type
                 Text(
                     text = "Question Type",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -561,7 +561,7 @@ fun QuestionDialog(
                         )
                     }
                 }
-                
+
                 // Marks
                 OutlinedTextField(
                     value = marks,
@@ -573,14 +573,14 @@ fun QuestionDialog(
                     ),
                     singleLine = true
                 )
-                
+
                 // Options (for MCQ, Single Choice, T/F)
                 if (questionType in listOf(QuestionType.MULTIPLE_CHOICE, QuestionType.SINGLE_CHOICE, QuestionType.TRUE_FALSE)) {
                     Text(
                         text = "Options",
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    
+
                     if (questionType == QuestionType.TRUE_FALSE) {
                         // For T/F, always have fixed True/False options
                         options = listOf(
@@ -588,7 +588,7 @@ fun QuestionDialog(
                             QuizOption(id = "false", optionText = "False", isCorrect = false)
                         )
                     }
-                    
+
                     options.forEachIndexed { index, option ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -602,7 +602,7 @@ fun QuestionDialog(
                                     options = updatedOptions
                                 }
                             )
-                            
+
                             OutlinedTextField(
                                 value = option.optionText,
                                 onValueChange = { optionText ->
@@ -614,7 +614,7 @@ fun QuestionDialog(
                                 singleLine = true,
                                 readOnly = questionType == QuestionType.TRUE_FALSE
                             )
-                            
+
                             if (questionType != QuestionType.TRUE_FALSE) {
                                 IconButton(
                                     onClick = {
@@ -629,7 +629,7 @@ fun QuestionDialog(
                             }
                         }
                     }
-                    
+
                     if (questionType != QuestionType.TRUE_FALSE && options.size < 6) {
                         Button(
                             onClick = {

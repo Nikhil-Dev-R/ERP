@@ -1,5 +1,6 @@
 package com.erp.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -38,7 +39,7 @@ fun DashboardCard(
                     .padding(end = 16.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
-            
+
             Column(
                 modifier = Modifier.weight(1f)
             ) {
@@ -48,9 +49,9 @@ fun DashboardCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
+
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
@@ -58,7 +59,7 @@ fun DashboardCard(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            
+
             if (count != null) {
                 Box(
                     modifier = Modifier

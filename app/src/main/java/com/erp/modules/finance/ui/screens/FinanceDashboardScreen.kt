@@ -64,7 +64,7 @@ import java.util.Locale
 
 @Composable
 fun FinanceDashboardScreen(
-//    viewModel: FinanceViewModel,
+    observeUiState1: StateFlow<*>,
     observeUiState: StateFlow<FinanceUiState?>,
     onNavigateToTransactions: () -> Unit,
     onNavigateToInvoices: () -> Unit,
@@ -75,10 +75,10 @@ fun FinanceDashboardScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by observeUiState.collectAsStateWithLifecycle()
-    val transactions = uiState?.transactions
-    val invoices = uiState?.invoices
-    val overdueInvoices = uiState?.overdueInvoices
-    
+    val transactions = uiState?.transactions ?: emptyList()
+    val invoices = uiState?.invoices ?: emptyList()
+    val overdueInvoices = uiState?.overdueInvoices ?: emptyList()
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = onAddTransaction) {
@@ -103,14 +103,14 @@ fun FinanceDashboardScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            
+
             item {
                 FinancialSummaryCard(
-                    transactions = transactions ?: emptyList(),
-                    invoices = invoices ?: emptyList()
+                    transactions = transactions,
+                    invoices = invoices
                 )
             }
-            
+
             // Quick Access Menu
             item {
                 Text(
@@ -119,7 +119,7 @@ fun FinanceDashboardScreen(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -130,14 +130,14 @@ fun FinanceDashboardScreen(
                         icon = Icons.Default.SwapHoriz,
                         onClick = onNavigateToTransactions
                     )
-                    
+
                     // Invoices
                     QuickAccessButton(
                         text = "Invoices",
                         icon = Icons.Default.Receipt,
                         onClick = onNavigateToInvoices
                     )
-                    
+
                     // Fees
                     QuickAccessButton(
                         text = "Fees",
@@ -145,9 +145,9 @@ fun FinanceDashboardScreen(
                         onClick = onNavigateToFees
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -158,19 +158,19 @@ fun FinanceDashboardScreen(
                         icon = Icons.Default.BarChart,
                         onClick = onNavigateToReports
                     )
-                    
+
                     // Budgets
                     QuickAccessButton(
                         text = "Budgets",
                         icon = Icons.Default.AccountBalance,
                         onClick = onNavigateToBudgets
                     )
-                    
+
                     // Spacer for 3-column alignment
                     Box(modifier = Modifier.width(100.dp))
                 }
             }
-            
+
             item {
                 Text(
                     text = "Recent Transactions",
@@ -179,14 +179,12 @@ fun FinanceDashboardScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-            
-            val recentTransactions = transactions?.sortedByDescending { it.date }?.take(5)
-            recentTransactions?.let {
-                items(it) { transaction ->
-                    TransactionItem(transaction)
-                }
+
+            val recentTransactions = transactions.sortedByDescending { it.date }.take(5)
+            items(recentTransactions) { transaction ->
+                TransactionItem(transaction)
             }
-            
+
             item {
                 Row(
                     modifier = Modifier
@@ -203,9 +201,9 @@ fun FinanceDashboardScreen(
                             .clickable { onNavigateToTransactions() }
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 Text(
                     text = "Overdue Invoices",
                     style = MaterialTheme.typography.titleLarge,
@@ -214,22 +212,20 @@ fun FinanceDashboardScreen(
                 )
             }
 
-            overdueInvoices?.let {
-                if (it.isEmpty()) {
-                    item {
-                        Text(
-                            text = "No overdue invoices",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                } else {
-                    items(overdueInvoices.take(3)) { invoice ->
-                        InvoiceItem(invoice)
-                    }
+            if (overdueInvoices.isEmpty()) {
+                item {
+                    Text(
+                        text = "No overdue invoices",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+            } else {
+                items(overdueInvoices.take(3)) { invoice ->
+                    InvoiceItem(invoice)
                 }
             }
-            
+
             item {
                 Row(
                     modifier = Modifier
@@ -246,7 +242,7 @@ fun FinanceDashboardScreen(
                             .clickable { onNavigateToInvoices() }
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
@@ -269,19 +265,19 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             val income = transactions
                 .filter { it.type == TransactionType.INCOME }
                 .sumOf { it.amount.toDouble() }
-            
+
             val expenses = transactions
                 .filter { it.type == TransactionType.EXPENSE }
                 .sumOf { it.amount.toDouble() }
-            
+
             val balance = income - expenses
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -305,7 +301,7 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
                         )
                     }
                 }
-                
+
                 Column {
                     Text(
                         text = "Expenses",
@@ -326,11 +322,11 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
                     }
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider()
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -347,13 +343,13 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
                     color = if (balance >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             val pendingInvoices = invoices
                 .filter { it.status == InvoiceStatus.SENT || it.status == InvoiceStatus.OVERDUE }
                 .sumOf { it.amount.toDouble() }
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -375,7 +371,7 @@ fun FinancialSummaryCard(transactions: List<Transaction>, invoices: List<Invoice
 @Composable
 fun TransactionItem(transaction: Transaction) {
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -401,7 +397,7 @@ fun TransactionItem(transaction: Transaction) {
                     color = MaterialTheme.colorScheme.outline
                 )
             }
-            
+
             Text(
                 text = CurrencyFormatter.formatAsRupees(transaction.amount),
                 style = MaterialTheme.typography.bodyLarge,
@@ -418,7 +414,7 @@ fun TransactionItem(transaction: Transaction) {
 @Composable
 fun InvoiceItem(invoice: Invoice) {
     val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-    
+
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -444,7 +440,7 @@ fun InvoiceItem(invoice: Invoice) {
                     color = MaterialTheme.colorScheme.error
                 )
             }
-            
+
             Text(
                 text = CurrencyFormatter.formatAsRupees(invoice.amount),
                 style = MaterialTheme.typography.bodyLarge,
@@ -483,9 +479,9 @@ fun QuickAccessButton(
                 modifier = Modifier.size(28.dp)
             )
         }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
@@ -499,11 +495,7 @@ fun QuickAccessButton(
 @Composable
 fun FinanceDashboardScreenPreview() {
     FinanceDashboardScreen(
-//        viewModel = FinanceViewModel(
-//            transactionRepository = TransactionRepository,
-//            invoiceRepository = InvoiceRepository,
-//            feeRepository = FeeRepository
-//        ),
+        observeUiState1 = MutableStateFlow(Any()),
         observeUiState = MutableStateFlow(
             FinanceUiState(
                 transactionsState = TransactionsUiState.Loading,
@@ -513,14 +505,13 @@ fun FinanceDashboardScreenPreview() {
                 transactionDetailState = TransactionDetailState.Loading,
                 invoiceDetailState = InvoiceDetailState.Loading,
             )
-        ).asStateFlow(),
+        ),
         onNavigateToTransactions = {},
         onNavigateToInvoices = {},
         onAddTransaction = {},
         onNavigateToFees = {},
         onNavigateToReports = {},
-        onNavigateToBudgets = { },
-        onNavigateBack = {},
-//        viewModel = TODO(),
+        onNavigateToBudgets = {},
+        onNavigateBack = {}
     )
 }

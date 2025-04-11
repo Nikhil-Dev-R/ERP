@@ -25,23 +25,23 @@ import java.util.UUID
 class ERPApplication : Application() {
     // Firebase Auth instance
     private lateinit var auth: FirebaseAuth
-    
+
     // Firestore instance
     private lateinit var firestore: FirebaseFirestore
-    
+
     // Database instance with safe initialization
-    val database by lazy { 
+    val database by lazy {
         try {
             // Use the force rebuild method to ensure clean database state
             AppDatabase.forceRebuildDatabase(this)
         } catch (e: Exception) {
             // Log the error
             Log.e("ERPApplication", "Database initialization failed: ${e.message}", e)
-            
+
             // Check for schema mismatch error
             if (e.message?.contains("Room cannot verify the data integrity") == true) {
                 Log.w("ERPApplication", "Schema mismatch detected, deleting database")
-                
+
                 // Retry database initialization with force rebuild
                 return@lazy AppDatabase.forceRebuildDatabase(this)
             } else {
@@ -55,20 +55,20 @@ class ERPApplication : Application() {
             }
         }
     }
-    
+
     // Auth manager
     val authManager by lazy { AuthManager(this) }
-    
+
     override fun onCreate() {
         super.onCreate()
-        
+
         // Initialize Firebase
         initializeFirebase()
-        
+
         // Sign in anonymously for Firebase Storage access
         signInAnonymously()
     }
-    
+
     private fun initializeFirebase() {
         try {
             // Initialize Firebase
@@ -78,11 +78,11 @@ class ERPApplication : Application() {
             } else {
                 Log.d("ERPApplication", "Firebase app already initialized")
             }
-            
+
             // Initialize Firebase Auth
             auth = Firebase.auth
             Log.d("ERPApplication", "Firebase Auth initialized: ${auth.currentUser != null}")
-            
+
             // Initialize Firestore with settings
             firestore = FirebaseFirestore.getInstance()
             val settings = FirebaseFirestoreSettings.Builder()
@@ -91,11 +91,11 @@ class ERPApplication : Application() {
                 .build()
             firestore.firestoreSettings = settings
             Log.d("ERPApplication", "Firestore initialized with persistence enabled")
-            
+
             // Initialize specific collections
             initializeInventoryCollections()
             initializeFeeModule() // Initialize the Fee module
-            
+
             // Test connection to Firestore
             CoroutineScope(Dispatchers.IO).launch {
                 if (isFirestoreAvailable()) {
@@ -104,12 +104,12 @@ class ERPApplication : Application() {
                     Log.e("ERPApplication", "Firestore connection test failed")
                 }
             }
-            
+
         } catch (e: Exception) {
             Log.e("ERPApplication", "Error initializing Firebase: ${e.message}", e)
         }
     }
-    
+
     private fun signInAnonymously() {
         // Only sign in if not already signed in
         if (auth.currentUser == null) {
@@ -130,7 +130,7 @@ class ERPApplication : Application() {
             Log.d("ERPApplication", "Already signed in as: ${auth.currentUser?.uid}")
         }
     }
-    
+
     /**
      * Checks if Firestore is available
      */
@@ -140,12 +140,12 @@ class ERPApplication : Application() {
                 Log.e("ERPApplication", "Network not available")
                 return false
             }
-            
+
             // Simple Firestore operation to test connection
             val document = com.google.android.gms.tasks.Tasks.await(
                 firestore.collection("test").document("test").get()
             )
-            
+
             Log.d("ERPApplication", "Firestore test completed successfully")
             true
         } catch (e: Exception) {
@@ -153,17 +153,17 @@ class ERPApplication : Application() {
             false
         }
     }
-    
+
     /**
      * Checks if network is available
      */
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val network = connectivityManager.activeNetwork ?: return false
             val activeNetwork = connectivityManager.getNetworkCapabilities(network) ?: return false
-            
+
             return when {
                 activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
                 activeNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
@@ -177,7 +177,7 @@ class ERPApplication : Application() {
             return networkInfo != null && networkInfo.isConnected
         }
     }
-    
+
     /**
      * Initializes the Inventory Management collections in Firebase Firestore
      * Creates the necessary collections with sample documents if they don't exist
@@ -186,14 +186,14 @@ class ERPApplication : Application() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val db = FirebaseFirestore.getInstance()
-                
+
                 // Create Products collection if it doesn't exist
                 val productsCollection = db.collection("products")
                 val productsSnapshot = productsCollection.limit(1).get().await()
-                
+
                 if (productsSnapshot.isEmpty) {
                     Log.d("ERPApplication", "Creating products collection with initial schema")
-                    
+
                     // Add a sample product to establish schema
                     val sampleProduct = hashMapOf(
                         "id" to UUID.randomUUID().toString(),
@@ -210,22 +210,22 @@ class ERPApplication : Application() {
                         "createdAt" to java.util.Date(),
                         "updatedAt" to java.util.Date()
                     )
-                    
+
                     productsCollection.document("sample-product").set(sampleProduct).await()
-                    
+
                     // Create indexes on commonly queried fields
                     // Note: Firebase indexes are actually created through the Firebase console or 
                     // using Firebase CLI with firestore.indexes.json, not programmatically in code
                     Log.d("ERPApplication", "Consider creating indexes on sku, category, and status fields")
                 }
-                
+
                 // Create Vendors collection if it doesn't exist
                 val vendorsCollection = db.collection("vendors")
                 val vendorsSnapshot = vendorsCollection.limit(1).get().await()
-                
+
                 if (vendorsSnapshot.isEmpty) {
                     Log.d("ERPApplication", "Creating vendors collection with initial schema")
-                    
+
                     // Add a sample vendor to establish schema
                     val sampleVendor = hashMapOf(
                         "id" to UUID.randomUUID().toString(),
@@ -244,21 +244,21 @@ class ERPApplication : Application() {
                         "createdAt" to java.util.Date(),
                         "updatedAt" to java.util.Date()
                     )
-                    
+
                     vendorsCollection.document("sample-vendor").set(sampleVendor).await()
-                    
+
                     // Create indexes on commonly queried fields
                     Log.d("ERPApplication", "Consider creating indexes on name, status, and country fields")
                 }
-                
+
                 Log.d("ERPApplication", "Inventory collections initialization completed")
-                
+
             } catch (e: Exception) {
                 Log.e("ERPApplication", "Error initializing inventory collections: ${e.message}", e)
             }
         }
     }
-    
+
     /**
      * Initializes the Fee Module collections in Firebase Firestore
      */
@@ -266,14 +266,14 @@ class ERPApplication : Application() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val db = FirebaseFirestore.getInstance()
-                
+
                 // Create Fees collection if it doesn't exist
                 val feesCollection = db.collection("fee_module_fees")
                 val feesSnapshot = feesCollection.limit(1).get().await()
-                
+
                 if (feesSnapshot.isEmpty) {
                     Log.d("ERPApplication", "Creating fee_module_fees collection with initial schema")
-                    
+
                     // Add a sample fee to establish schema
                     val sampleFee = hashMapOf(
                         "id" to UUID.randomUUID().toString(),
@@ -294,15 +294,15 @@ class ERPApplication : Application() {
                         "createdAt" to java.util.Date(),
                         "updatedAt" to java.util.Date()
                     )
-                    
+
                     feesCollection.document("sample-fee").set(sampleFee).await()
-                    
+
                     // Create indexes on commonly queried fields
                     Log.d("ERPApplication", "Consider creating indexes on studentId, feeType, and paymentStatus fields")
                 }
-                
+
                 Log.d("ERPApplication", "Fee module collection initialization completed")
-                
+
             } catch (e: Exception) {
                 Log.e("ERPApplication", "Error initializing fee module collections: ${e.message}", e)
             }

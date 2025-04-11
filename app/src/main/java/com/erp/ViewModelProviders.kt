@@ -39,7 +39,7 @@ fun provideFinanceViewModel(application: ERPApplication): FinanceViewModel {
     val transactionDao = application.database.transactionDao()
     val invoiceDao = application.database.invoiceDao()
     val feeDao = application.database.feeDao()
-    
+
     return FinanceViewModel(
         transactionRepository = TransactionRepository(
             transactionDao = transactionDao,
@@ -64,7 +64,7 @@ fun provideHRViewModel(application: ERPApplication): HRViewModel {
     val salaryDao = application.database.salaryDao()
     val teacherDao = application.database.teacherDao()
     val staffDao = application.database.staffDao()
-    
+
     return HRViewModel(
         employeeRepository = EmployeeRepository(
             employeeDao = employeeDao,
@@ -92,7 +92,7 @@ fun provideHRViewModel(application: ERPApplication): HRViewModel {
 fun provideStudentViewModel(application: ERPApplication): StudentViewModel {
     // Create repository
     val studentDao = application.database.studentDao()
-    
+
     return StudentViewModel(
         studentRepository = StudentRepository(
             studentDao = studentDao,
@@ -106,7 +106,7 @@ fun provideInventoryViewModel(application: ERPApplication): InventoryViewModel {
     // Create repositories
     val productDao = application.database.productDao()
     val vendorDao = application.database.vendorDao()
-    
+
     return InventoryViewModel(
         productRepository = ProductRepository(
             productDao = productDao,
@@ -123,7 +123,7 @@ fun provideInventoryViewModel(application: ERPApplication): InventoryViewModel {
 fun provideFeeViewModel(application: ERPApplication): com.erp.modules.fee.ui.viewmodel.FeeViewModel {
     // Create repository
     val feeDao = application.database.feeDao()
-    
+
     return com.erp.modules.fee.ui.viewmodel.FeeViewModel(
         feeRepository = com.erp.modules.fee.data.repository.FeeRepository(
             feeDao = feeDao,
