@@ -239,7 +239,7 @@ fun ProductDetailScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isCategoryExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+//                        .menuAnchor()
                 )
                 
                 ExposedDropdownMenu(
@@ -272,7 +272,7 @@ fun ProductDetailScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isStatusExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+//                        .menuAnchor()
                 )
                 
                 ExposedDropdownMenu(
@@ -305,7 +305,7 @@ fun ProductDetailScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isVendorExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+//                        .menuAnchor()
                 )
                 
                 ExposedDropdownMenu(

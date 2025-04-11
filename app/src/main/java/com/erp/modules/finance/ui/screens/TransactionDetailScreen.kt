@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -119,7 +120,7 @@ fun TransactionDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -181,7 +182,7 @@ fun TransactionDetailScreen(
                                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .menuAnchor()
+//                                    .menuAnchor()
                             )
                             
                             ExposedDropdownMenu(
@@ -274,7 +275,7 @@ fun TransactionDetailScreen(
                                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .menuAnchor()
+//                                    .menuAnchor()
                             )
                             
                             if (category.isNotEmpty()) {

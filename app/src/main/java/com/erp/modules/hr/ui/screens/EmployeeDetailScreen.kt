@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -88,7 +89,7 @@ fun EmployeeDetailScreen(
                 title = { Text("Employee Details") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -235,12 +236,14 @@ fun ProfileTab(employee: Employee) {
             label = "Gender",
             value = employee.gender
         )
-        
-        InfoRow(
-            icon = Icons.Default.CalendarMonth,
-            label = "Date of Birth",
-            value = dateFormat.format(employee.dateOfBirth)
-        )
+
+        employee.dateOfBirth?.let {
+            InfoRow(
+                icon = Icons.Default.CalendarMonth,
+                label = "Date of Birth",
+                value = dateFormat.format(it)
+            )
+        }
         
         InfoRow(
             icon = Icons.Default.LocationOn,

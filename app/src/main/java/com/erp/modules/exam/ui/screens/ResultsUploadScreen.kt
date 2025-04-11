@@ -65,7 +65,7 @@ fun ResultsUploadScreen(
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor()
+//                            .menuAnchor()
                     )
                     
                     // Mock dropdown menu

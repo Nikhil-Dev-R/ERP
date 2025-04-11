@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Save
@@ -112,7 +113,7 @@ fun AddEmployeeScreen(
                 title = { Text("Add New Employee") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -237,7 +238,7 @@ fun AddEmployeeScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedGender) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+//                        .menuAnchor()
                 )
                 
                 ExposedDropdownMenu(
@@ -380,7 +381,7 @@ fun AddEmployeeScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedRole) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+//                        .menuAnchor()
                 )
                 
                 ExposedDropdownMenu(
@@ -436,7 +437,7 @@ fun AddEmployeeScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEmploymentType) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+//                        .menuAnchor()
                 )
                 
                 ExposedDropdownMenu(
@@ -468,7 +469,7 @@ fun AddEmployeeScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor()
+//                        .menuAnchor()
                 )
                 
                 ExposedDropdownMenu(
