@@ -58,6 +58,7 @@ fun StudentsScreen(
     observeStudentSuggestionsState: StateFlow<List<Student>>,
     searchStudents: (query: String) -> Unit,
     onNavigateToStudentDetail: (studentId: String?) -> Unit,
+    onFabClick: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val studentsState by observeAllStudentsState.collectAsState()
@@ -73,7 +74,7 @@ fun StudentsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onNavigateToStudentDetail(null) }) {
+            FloatingActionButton(onClick = onFabClick) {
                 Icon(Icons.Default.Add, contentDescription = "Add Student")
             }
         },
@@ -247,6 +248,7 @@ fun SSPreview() {
         ).asStateFlow(),
         searchStudents = {},
         onNavigateToStudentDetail = {},
-        onNavigateBack = {}
+        onNavigateBack = {},
+        onFabClick = {}
     )
 }

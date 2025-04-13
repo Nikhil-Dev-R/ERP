@@ -451,10 +451,9 @@ fun ERPNavHost(
             StudentHomeScreen(
                 studentDetailUiStateFlow = viewModel.studentViewModel.studentDetailState,
                 role = Student,
-                studentId = studentId,
                 deleteStudent = viewModel.studentViewModel::deleteStudent,
-                onNavigateToEdit = { id ->
-                    navController.navigate("${ERPDestinations.STUDENT_FORM_ROUTE}?studentId=$id")
+                onNavigateToEdit = {
+                    navController.navigate("${ERPDestinations.STUDENT_FORM_ROUTE}?studentId=$studentId")
                 }
             )
         }
@@ -493,6 +492,9 @@ fun ERPNavHost(
                         navController.navigate("${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$studentId")
                     }
                 },
+                onFabClick = {
+                    navController.navigate(ERPDestinations.STUDENT_FORM_ROUTE)
+                },
                 onNavigateBack = {
                     navController.navigateUp()
                 }
@@ -512,23 +514,22 @@ fun ERPNavHost(
             val studentId = backStackEntry.arguments?.getString("studentId")
 
             LaunchedEffect(studentId) {
-                if (studentId != null) {
-                    viewModel.studentViewModel.getStudentDetail(studentId)
-                } else {
+                if (studentId == null || studentId.isEmpty()) {
                     viewModel.studentViewModel.createNewStudent()
+                } else {
+                    viewModel.studentViewModel.getStudentDetail(studentId)
                 }
             }
 
             StudentDetailScreen(
                 studentDetailUiStateFlow = viewModel.studentViewModel.studentDetailState,
                 role = Admin,
-                studentId = studentId,
                 deleteStudent = viewModel.studentViewModel::deleteStudent,
                 onNavigateBack = {
                     navController.navigateUp()
                 },
-                onNavigateToEdit = { id ->
-                    navController.navigate("${ERPDestinations.STUDENT_FORM_ROUTE}?studentId=$id")
+                onNavigateToEdit = {
+                    navController.navigate("${ERPDestinations.STUDENT_FORM_ROUTE}?studentId=$studentId")
                 }
             )
         }
@@ -545,9 +546,19 @@ fun ERPNavHost(
             )
         ) { backStackEntry ->
             val studentId = backStackEntry.arguments?.getString("studentId")
+
+            // Load student data when the screen launches
+            LaunchedEffect(studentId) {
+                if (studentId != null) {
+                    viewModel.studentViewModel.getStudentDetail(studentId)
+                } else {
+                    viewModel.studentViewModel.createNewStudent()
+                }
+            }
+
             StudentFormScreen(
-                viewModel = viewModel.studentViewModel,
-                studentId = studentId,
+                observeStudent = viewModel.studentViewModel.currentStudent,
+                saveStudent = viewModel.studentViewModel::saveStudent,
                 onNavigateBack = {
                     navController.navigateUp()
                 }

@@ -39,11 +39,10 @@ import java.util.*
 fun StudentDetailScreen(
     studentDetailUiStateFlow: StateFlow<StudentDetailUiState>,
     role: UserRole,
-    studentId: String? = null,
     isHome: Boolean = false,
     deleteStudent: (Student) -> Unit = {},
     onNavigateBack: () -> Unit = {},
-    onNavigateToEdit: (String?) -> Unit = {}
+    onNavigateToEdit: () -> Unit = {}
 ) {
     val studentDetailState by studentDetailUiStateFlow.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -57,27 +56,28 @@ fun StudentDetailScreen(
                 centerAligned = isHome,
                 actions = {
                     if (role == UserRole.Admin || role == UserRole.Teacher) {
-                        if (studentId != null) {
-                            // Edit button
-                            IconButton(onClick = { onNavigateToEdit(studentId) }) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit Student"
-                                )
-                            }
-
-                            // Delete button
-                            IconButton(onClick = { showDeleteDialog = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete Student"
-                                )
-                            }
+                        // Delete button
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete Student",
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            if (role == UserRole.Admin || role == UserRole.Teacher) {
+                FloatingActionButton(onClick = { onNavigateToEdit() }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Student"
+                    )
+                }
+            }
+        },
     ) { paddingValues ->
         when (val state = studentDetailState) {
             is StudentDetailUiState.Loading -> {

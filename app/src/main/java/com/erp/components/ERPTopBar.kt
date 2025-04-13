@@ -1,6 +1,7 @@
 package com.erp.components
 
 import android.media.Image
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -24,7 +25,7 @@ fun ERPTopBar(
     title: String = "Title",
     navIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack,
     onNavIconClick: () -> Unit = {},
-    actions: @Composable () -> Unit = {},
+    actions: @Composable (RowScope.() -> Unit) = {},
 ) {
     if (centerAligned) {
         CenterAlignedTopAppBar(
@@ -34,7 +35,7 @@ fun ERPTopBar(
                     style = MaterialTheme.typography.headlineLarge
                 )
             },
-            actions = { actions },
+            actions = actions,
             modifier = modifier,
         )
     } else {
@@ -53,7 +54,7 @@ fun ERPTopBar(
                     )
                 }
             },
-            actions = { actions },
+            actions = actions,
             modifier = modifier,
         )
     }

@@ -14,14 +14,12 @@ import kotlinx.coroutines.flow.asStateFlow
 fun StudentHomeScreen(
     studentDetailUiStateFlow: StateFlow<StudentDetailUiState>,
     role: UserRole,
-    studentId: String? = null,
     deleteStudent: (Student) -> Unit = {},
-    onNavigateToEdit: (String?) -> Unit = {},
+    onNavigateToEdit: () -> Unit = {},
 ) {
     StudentDetailScreen(
         studentDetailUiStateFlow = studentDetailUiStateFlow,
         role = role,
-        studentId = studentId,
         isHome = true,
         deleteStudent = deleteStudent,
         onNavigateToEdit = onNavigateToEdit,
