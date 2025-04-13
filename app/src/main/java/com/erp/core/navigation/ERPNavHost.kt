@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -63,6 +62,7 @@ import com.erp.modules.finance.ui.screens.InvoicesScreen
 import com.erp.modules.finance.ui.screens.InvoiceDetailScreen
 import com.erp.modules.finance.ui.screens.FinancialReportsScreen
 import com.erp.modules.finance.ui.screens.BudgetManagementScreen
+import com.erp.modules.student.ui.screens.StudentHomeScreen
 
 @Composable
 fun ERPNavHost(
@@ -70,11 +70,13 @@ fun ERPNavHost(
     viewModel: MainViewModel
 ) {
     // Determine start destination based on authentication status
-    val startDestination = if (viewModel.authManager.isUserSignedIn()) {
-        ERPDestinations.HOME_ROUTE
-    } else {
-        ERPDestinations.LOGIN_ROUTE
-    }
+    val startDestination = ERPDestinations.ADMIN_HOME_ROUTE
+
+//        if (viewModel.authManager.isUserSignedIn()) {
+//        ERPDestinations.HOME_ROUTE
+//    } else {
+//        ERPDestinations.LOGIN_ROUTE
+//    }
 
     NavHost(
         navController = navController,
@@ -85,9 +87,9 @@ fun ERPNavHost(
                 authManager = viewModel.authManager,
                 onRegisterSuccess = { role, id ->
                     val route = when (role) {
-                        is Admin -> ERPDestinations.HOME_ROUTE
-                        is Teacher, is Parent, is Student -> "${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$id"
-                        else -> ERPDestinations.HOME_ROUTE
+                        is Admin -> ERPDestinations.ADMIN_HOME_ROUTE
+                        is Parent, is Student -> "${ERPDestinations.STUDENT_HOME_ROUTE}?studentId=$id"
+                        else -> ERPDestinations.ADMIN_HOME_ROUTE
                     }
                     navController.navigate(route) {
                         popUpTo(ERPDestinations.REGISTER_ROUTE) { inclusive = true }
@@ -107,9 +109,9 @@ fun ERPNavHost(
                 authManager = viewModel.authManager,
                 onLoginSuccess = { role: UserRole, id: String ->
                     val route = when (role) {
-                        is Admin -> ERPDestinations.HOME_ROUTE
+                        is Admin -> ERPDestinations.ADMIN_HOME_ROUTE
                         is Teacher, is Parent, is Student -> "${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$id"
-                        else -> ERPDestinations.HOME_ROUTE
+                        else -> ERPDestinations.ADMIN_HOME_ROUTE
                     }
                     navController.navigate(route) {
                         popUpTo(ERPDestinations.LOGIN_ROUTE) { inclusive = true }
@@ -126,7 +128,7 @@ fun ERPNavHost(
             )
         }
         
-        composable(ERPDestinations.HOME_ROUTE) {
+        composable(ERPDestinations.ADMIN_HOME_ROUTE) {
             HomeScreen(
                 onNavigateToFinance = {
                     navController.navigate(ERPDestinations.FINANCE_DASHBOARD_ROUTE)
@@ -155,7 +157,7 @@ fun ERPNavHost(
                 onLogout = {
                     viewModel.authManager.signOut()
                     navController.navigate(ERPDestinations.LOGIN_ROUTE) {
-                        popUpTo(ERPDestinations.HOME_ROUTE) { inclusive = true }
+                        popUpTo(ERPDestinations.ADMIN_HOME_ROUTE) { inclusive = true }
                     }
                 }
             )
@@ -426,11 +428,40 @@ fun ERPNavHost(
                 message = "This screen is under development"
             )
         }
+
+        composable(
+            route = ERPDestinations.STUDENT_HOME_ROUTE + "?studentId={studentId}",
+            arguments = listOf(
+                navArgument("studentId") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val studentId = backStackEntry.arguments?.getString("studentId")
+
+            LaunchedEffect(studentId) {
+                if (studentId == null || studentId.isEmpty()) {
+                    viewModel.studentViewModel.createNewStudent()
+                } else {
+                    viewModel.studentViewModel.getStudentDetail(studentId)
+                }
+            }
+            StudentHomeScreen(
+                studentDetailUiStateFlow = viewModel.studentViewModel.studentDetailState,
+                role = Student,
+                studentId = studentId,
+                deleteStudent = viewModel.studentViewModel::deleteStudent,
+                onNavigateToEdit = { id ->
+                    navController.navigate("${ERPDestinations.STUDENT_FORM_ROUTE}?studentId=$id")
+                }
+            )
+        }
         
         // Student module navigation
         composable(ERPDestinations.STUDENTS_DASHBOARD_ROUTE) {
             StudentDashboardScreen(
-//                viewModel = viewModel.studentViewModel,
                 onNavigateToStudentsList = {
                     navController.navigate(ERPDestinations.STUDENTS_ROUTE)
                 },
@@ -452,7 +483,9 @@ fun ERPNavHost(
         
         composable(ERPDestinations.STUDENTS_ROUTE) {
             StudentsScreen(
-                viewModel = viewModel.studentViewModel,
+                observeAllStudentsState = viewModel.studentViewModel.allStudents,
+                observeStudentSuggestionsState = viewModel.studentViewModel.studentSuggestions,
+                searchStudents = viewModel.studentViewModel::searchStudents,
                 onNavigateToStudentDetail = { studentId ->
                     if (studentId == null) {
                         navController.navigate(ERPDestinations.STUDENT_DETAIL_ROUTE)
@@ -465,7 +498,7 @@ fun ERPNavHost(
                 }
             )
         }
-        
+
         composable(
             route = ERPDestinations.STUDENT_DETAIL_ROUTE + "?studentId={studentId}",
             arguments = listOf(
@@ -487,9 +520,8 @@ fun ERPNavHost(
             }
 
             StudentDetailScreen(
-//                viewModel = viewModel.studentViewModel,
                 studentDetailUiStateFlow = viewModel.studentViewModel.studentDetailState,
-                role = UserRole.Admin,
+                role = Admin,
                 studentId = studentId,
                 deleteStudent = viewModel.studentViewModel::deleteStudent,
                 onNavigateBack = {

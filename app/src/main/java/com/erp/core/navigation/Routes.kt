@@ -3,7 +3,11 @@ package com.erp.core.navigation
 object ERPDestinations {
     const val LOGIN_ROUTE = "login"
     const val REGISTER_ROUTE = "register"
-    const val HOME_ROUTE = "home"
+    const val ADMIN_HOME_ROUTE = "admin_home"
+    const val STUDENT_HOME_ROUTE = "student_home"
+    const val TEACHER_HOME_ROUTE = "teacher_home"
+    const val PARENT_HOME_ROUTE = "parent_home"
+    const val HR_HOME_ROUTE = "hr_home"
 
     // Finance module
     const val FINANCE_DASHBOARD_ROUTE = "finance_dashboard"
@@ -29,7 +33,6 @@ object ERPDestinations {
     const val PAYROLL_ROUTE = "payroll"
 
     // Student module
-    const val STUDENT_HOME = "student_home"
     const val STUDENTS_DASHBOARD_ROUTE = "students_dashboard"
     const val STUDENTS_ROUTE = "students"
     const val STUDENT_DETAIL_ROUTE = "student_detail"
