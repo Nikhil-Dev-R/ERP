@@ -18,8 +18,11 @@ class StudentViewModel(
     private val TAG = "StudentViewModel"
     
     // UI state for student list
-    private val _studentsState = MutableStateFlow<StudentsUiState>(StudentsUiState.Loading)
-    val studentsState: StateFlow<StudentsUiState> = _studentsState
+    private val _allStudents = MutableStateFlow<StudentsUiState>(StudentsUiState.Loading)
+    val allStudents: StateFlow<StudentsUiState> = _allStudents
+
+    private val _studentSuggestions = MutableStateFlow<List<Student>>(emptyList())
+    val studentSuggestions: StateFlow<List<Student>> = _studentSuggestions
     
     // UI state for single student details
     private val _studentDetailState = MutableStateFlow<StudentDetailUiState>(StudentDetailUiState.Loading)
@@ -37,16 +40,16 @@ class StudentViewModel(
     fun loadAllStudents() {
         Log.d(TAG, "Loading all students")
         viewModelScope.launch {
-            _studentsState.value = StudentsUiState.Loading
+            _allStudents.value = StudentsUiState.Loading
             
             studentRepository.getAllStudents()
                 .catch { error ->
                     Log.e(TAG, "Error loading students: ${error.message}", error)
-                    _studentsState.value = StudentsUiState.Error(error.message ?: "Unknown error")
+                    _allStudents.value = StudentsUiState.Error(error.message ?: "Unknown error")
                 }
                 .collect { students ->
                     Log.d(TAG, "Loaded ${students.size} students")
-                    _studentsState.value = if (students.isEmpty()) {
+                    _allStudents.value = if (students.isEmpty()) {
                         Log.d(TAG, "No students found")
                         StudentsUiState.Empty
                     } else {
@@ -59,16 +62,16 @@ class StudentViewModel(
     fun getStudentsByClass(grade: String, section: String) {
         Log.d(TAG, "Getting students by class: $grade-$section")
         viewModelScope.launch {
-            _studentsState.value = StudentsUiState.Loading
+            _allStudents.value = StudentsUiState.Loading
             
             studentRepository.getStudentsByClass(grade, section)
                 .catch { error ->
                     Log.e(TAG, "Error loading students by class: ${error.message}", error)
-                    _studentsState.value = StudentsUiState.Error(error.message ?: "Unknown error")
+                    _allStudents.value = StudentsUiState.Error(error.message ?: "Unknown error")
                 }
                 .collect { students ->
                     Log.d(TAG, "Loaded ${students.size} students for class $grade-$section")
-                    _studentsState.value = if (students.isEmpty()) {
+                    _allStudents.value = if (students.isEmpty()) {
                         StudentsUiState.Empty
                     } else {
                         StudentsUiState.Success(students)
@@ -105,20 +108,16 @@ class StudentViewModel(
         }
         
         viewModelScope.launch {
-            _studentsState.value = StudentsUiState.Loading
+            _allStudents.value = StudentsUiState.Loading
             
             studentRepository.searchStudents(query)
                 .catch { error ->
                     Log.e(TAG, "Error searching students: ${error.message}", error)
-                    _studentsState.value = StudentsUiState.Error(error.message ?: "Unknown error")
+                    _studentSuggestions.value = emptyList()
                 }
                 .collect { students ->
                     Log.d(TAG, "Found ${students.size} students matching query: $query")
-                    _studentsState.value = if (students.isEmpty()) {
-                        StudentsUiState.Empty
-                    } else {
-                        StudentsUiState.Success(students)
-                    }
+                    _studentSuggestions.value = students
                 }
         }
     }
@@ -163,6 +162,7 @@ class StudentViewModel(
                 // Handle error
             }
         }
+        Log.d(TAG, "Closing Deletion student with ID: ${student.id}")
     }
 }
 

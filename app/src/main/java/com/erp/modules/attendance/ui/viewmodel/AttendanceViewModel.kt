@@ -18,25 +18,27 @@ class AttendanceViewModel(
     // UI state for attendance list
     private val _attendanceState = MutableStateFlow<AttendanceState>(AttendanceState.Loading)
     val attendanceState = _attendanceState.asStateFlow()
-    
+
     // UI state for class attendance (all students in a class for a specific date)
-    private val _classAttendanceState = MutableStateFlow<ClassAttendanceUiState>(ClassAttendanceUiState.Loading)
+    private val _classAttendanceState =
+        MutableStateFlow<ClassAttendanceUiState>(ClassAttendanceUiState.Loading)
     val classAttendanceState: StateFlow<ClassAttendanceUiState> = _classAttendanceState
-    
+
     // UI state for student attendance (attendance history for a specific student)
-    private val _studentAttendanceState = MutableStateFlow<StudentAttendanceUiState>(StudentAttendanceUiState.Loading)
+    private val _studentAttendanceState =
+        MutableStateFlow<StudentAttendanceUiState>(StudentAttendanceUiState.Loading)
     val studentAttendanceState: StateFlow<StudentAttendanceUiState> = _studentAttendanceState
-    
+
     // For filtering
     private val _selectedDate = MutableStateFlow<Date>(Calendar.getInstance().time)
     val selectedDate: StateFlow<Date> = _selectedDate
-    
+
     private val _selectedClass = MutableStateFlow<String>("")
     val selectedClass: StateFlow<String> = _selectedClass
-    
+
     private val _selectedSection = MutableStateFlow<String>("")
     val selectedSection: StateFlow<String> = _selectedSection
-    
+
     // Today's attendance records
     private val today = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0)
@@ -44,7 +46,7 @@ class AttendanceViewModel(
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
     }.time
-    
+
     val attendanceRecords: Flow<List<Attendance>> = attendanceRepository.getAttendanceByDate(today)
         .onEach { records ->
             _attendanceState.value = if (records.isEmpty()) {
@@ -56,11 +58,11 @@ class AttendanceViewModel(
         .catch { e ->
             _attendanceState.value = AttendanceState.Error(e.message ?: "Unknown error")
         }
-    
+
     // Student list for attendance
     private val _studentsState = MutableStateFlow<StudentsState>(StudentsState.Loading)
     val studentsState = _studentsState.asStateFlow()
-    
+
     val students: Flow<List<Student>> = studentRepository.getAllStudents()
         .onEach { studentList ->
             _studentsState.value = if (studentList.isEmpty()) {
@@ -72,16 +74,16 @@ class AttendanceViewModel(
         .catch { e ->
             _studentsState.value = StudentsState.Error(e.message ?: "Unknown error")
         }
-    
+
     // Attendance statistics
     private val _attendanceStats = MutableStateFlow<AttendanceStats?>(null)
     val attendanceStats = _attendanceStats.asStateFlow()
-    
+
     // Load mock data initially
     init {
         loadMockData()
     }
-    
+
     private fun loadMockData() {
         val mockStudents = listOf(
             Student(
@@ -112,28 +114,28 @@ class AttendanceViewModel(
                 id = "student3"
             }
         )
-        
+
         val mockAttendance = mockStudents.map { student ->
             Attendance(
                 studentId = student.id,
                 date = today,
                 status = "PRESENT",
-                classId = "9", 
+                classId = "9",
                 sectionId = "A"
             ).apply {
                 id = UUID.randomUUID().toString()
             }
         }
-        
+
         _attendanceState.value = AttendanceState.Success(mockAttendance)
-        
+
         val classAttendanceData = mockStudents.map { student ->
             StudentAttendanceRecord(
                 student = student,
                 attendance = mockAttendance.find { it.studentId == student.id }
             )
         }
-        
+
         _classAttendanceState.value = ClassAttendanceUiState.Success(
             ClassAttendanceData(
                 date = today,
@@ -143,36 +145,36 @@ class AttendanceViewModel(
             )
         )
     }
-    
+
     fun setSelectedDate(date: Date) {
         _selectedDate.value = date
         loadAttendanceForDate(date, _selectedClass.value, _selectedSection.value)
     }
-    
+
     fun setSelectedClass(classId: String, sectionId: String) {
         _selectedClass.value = classId
         _selectedSection.value = sectionId
         loadAttendanceForDate(_selectedDate.value, classId, sectionId)
     }
-    
+
     private fun loadAttendanceForDate(date: Date, classId: String, sectionId: String) {
         if (classId.isBlank() || sectionId.isBlank()) {
             _classAttendanceState.value = ClassAttendanceUiState.Empty
             return
         }
-        
+
         viewModelScope.launch {
             _classAttendanceState.value = ClassAttendanceUiState.Loading
-            
+
             // In a real app, we would fetch from repository
             // For now, just use the mock data if class and section match
             val attendance = (_attendanceState.value as? AttendanceState.Success)?.attendanceList
-                ?.filter { 
-                    isSameDay(it.date, date) && 
-                    it.classId == classId && 
-                    it.sectionId == sectionId 
+                ?.filter {
+                    isSameDay(it.date, date) &&
+                            it.classId == classId &&
+                            it.sectionId == sectionId
                 } ?: emptyList()
-                
+
             if (attendance.isEmpty()) {
                 _classAttendanceState.value = ClassAttendanceUiState.Empty
             } else {
@@ -206,14 +208,14 @@ class AttendanceViewModel(
                         id = "student3"
                     }
                 )
-                
+
                 val records = mockStudents.map { student ->
                     StudentAttendanceRecord(
                         student = student,
                         attendance = attendance.find { it.studentId == student.id }
                     )
                 }
-                
+
                 _classAttendanceState.value = ClassAttendanceUiState.Success(
                     ClassAttendanceData(
                         date = date,
@@ -225,17 +227,17 @@ class AttendanceViewModel(
             }
         }
     }
-    
+
     fun loadAttendanceForStudent(studentId: String) {
         viewModelScope.launch {
             _studentAttendanceState.value = StudentAttendanceUiState.Loading
-            
+
             // In a real app, we would fetch from repository
             val attendance = (_attendanceState.value as? AttendanceState.Success)?.attendanceList
                 ?.filter { it.studentId == studentId }
                 ?.sortedByDescending { it.date }
                 ?: emptyList()
-                
+
             if (attendance.isEmpty()) {
                 _studentAttendanceState.value = StudentAttendanceUiState.Empty
             } else {
@@ -249,7 +251,7 @@ class AttendanceViewModel(
                 ).apply {
                     id = studentId
                 }
-                
+
                 _studentAttendanceState.value = StudentAttendanceUiState.Success(
                     StudentAttendanceData(
                         student = mockStudent,
@@ -259,16 +261,17 @@ class AttendanceViewModel(
             }
         }
     }
-    
+
     fun markAttendance(studentId: String, isPresent: Boolean) {
         viewModelScope.launch {
             val status = if (isPresent) "PRESENT" else "ABSENT"
-            
+
             // Check if attendance record already exists for this student today
-            val existingRecord = attendanceRepository.getAttendanceByStudentAndDate(studentId, today)
-                .first()
-                ?.firstOrNull()
-            
+            val existingRecord =
+                attendanceRepository.getAttendanceByStudentAndDate(studentId, today)
+                    .first()
+                    ?.firstOrNull()
+
             if (existingRecord != null) {
                 // Update existing attendance record
                 val updatedAttendance = Attendance(
@@ -300,7 +303,7 @@ class AttendanceViewModel(
             }
         }
     }
-    
+
     fun markClassAttendance(classId: String, studentIds: List<String>, status: String) {
         viewModelScope.launch {
             val attendanceList = studentIds.map { studentId ->
@@ -314,11 +317,11 @@ class AttendanceViewModel(
                     lastModified = Date()
                 )
             }
-            
+
             attendanceRepository.markAttendanceForClass(classId, today, attendanceList)
         }
     }
-    
+
     fun loadAttendanceStats(classId: String? = null, fromDate: Date? = null, toDate: Date? = null) {
         viewModelScope.launch {
             try {
@@ -338,11 +341,12 @@ class AttendanceViewModel(
             }
         }
     }
-    
+
     fun getStudentAttendanceRecord(studentId: String) {
         viewModelScope.launch {
             try {
-                val attendanceByStudent = attendanceRepository.getAttendanceByStudent(studentId).first()
+                val attendanceByStudent =
+                    attendanceRepository.getAttendanceByStudent(studentId).first()
                 // Process and update UI with the attendance record
                 if (attendanceByStudent.isNotEmpty()) {
                     // Fetch student details (in a real app would come from repository)
@@ -355,7 +359,7 @@ class AttendanceViewModel(
                     ).apply {
                         id = studentId
                     }
-                    
+
                     _studentAttendanceState.value = StudentAttendanceUiState.Success(
                         StudentAttendanceData(
                             student = student,
@@ -366,33 +370,35 @@ class AttendanceViewModel(
                     _studentAttendanceState.value = StudentAttendanceUiState.Empty
                 }
             } catch (e: Exception) {
-                _studentAttendanceState.value = StudentAttendanceUiState.Error(e.message ?: "Unknown error")
+                _studentAttendanceState.value =
+                    StudentAttendanceUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
-    
+
     fun syncAttendanceData() {
         viewModelScope.launch {
             attendanceRepository.syncWithCloud()
         }
     }
-    
+
     fun saveAttendance() {
         // In a real app, this would commit all pending attendance changes to the repository
         // For now, we'll just show a success state
         val currentState = _classAttendanceState.value as? ClassAttendanceUiState.Success ?: return
-        
+
         // Update the main attendance list
-        val currentAttendanceList = (_attendanceState.value as? AttendanceState.Success)?.attendanceList ?: emptyList()
+        val currentAttendanceList =
+            (_attendanceState.value as? AttendanceState.Success)?.attendanceList ?: emptyList()
         val updatedAttendanceList = currentAttendanceList.toMutableList()
-        
+
         // Add or update attendance records
         currentState.data.records.forEach { record ->
             if (record.attendance != null) {
-                val existingIndex = updatedAttendanceList.indexOfFirst { 
-                    it.id == record.attendance.id 
+                val existingIndex = updatedAttendanceList.indexOfFirst {
+                    it.id == record.attendance.id
                 }
-                
+
                 if (existingIndex >= 0) {
                     updatedAttendanceList[existingIndex] = record.attendance
                 } else {
@@ -400,28 +406,136 @@ class AttendanceViewModel(
                 }
             }
         }
-        
+
         _attendanceState.value = AttendanceState.Success(updatedAttendanceList)
     }
-    
+
     private fun isSameDay(date1: Date?, date2: Date?): Boolean {
         if (date1 == null || date2 == null) return false
-        
+
         val cal1 = Calendar.getInstance()
         cal1.time = date1
-        
+
         val cal2 = Calendar.getInstance()
         cal2.time = date2
-        
+
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-               cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
-               cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)
+                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+                cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH)
     }
-    
+
     fun getFormattedDate(date: Date): String {
         val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
         return formatter.format(date)
     }
+
+    fun applyFilters(
+        nameStarts: List<String?>,
+        classSet: List<String>,
+        sectionSet: List<String>,
+        attendanceStatus: String?,
+        attendanceStartDate: Date?,
+        attendanceEndDate: Date?,
+        fees: List<String?>,
+        transport: List<String?>,
+        library: List<String?>,
+        performance: List<String?>
+    ) {
+        viewModelScope.launch {
+            _classAttendanceState.value = ClassAttendanceUiState.Loading
+
+            studentRepository.getAllStudents() // <-- changed to get all students
+                .catch { e ->
+                    _classAttendanceState.value =
+                        ClassAttendanceUiState.Error(e.message ?: "Failed to fetch students")
+                }
+                .collect { students ->
+                    // Step 0: Filter by class + section
+                    val classSectionFiltered = students.filter { student ->
+                        (classSet.isEmpty() || student.grade in classSet) &&
+                                (sectionSet.isEmpty() || student.section in sectionSet)
+                    }
+
+                    // Step 1: Filter by name prefix (multi-prefix support)
+                    val nameFiltered = if (nameStarts.isNotEmpty()) {
+                        students.filter { student ->
+                            nameStarts.filterNotNull().any { prefix ->
+                                "${student.firstName} ${student.lastName}".startsWith(prefix, ignoreCase = true)
+                            }
+                        }
+                    } else students
+
+                    // Step 2: Prepare lowercase filter sets for fast lookup
+                    val feesSet = fees.filterNotNull().map { it.lowercase() }.toSet()
+                    val transportSet = transport.filterNotNull().map { it.lowercase() }.toSet()
+                    val librarySet = library.filterNotNull().map { it.lowercase() }.toSet()
+                    val performanceSet = performance.filterNotNull().map { it.lowercase() }.toSet()
+
+                    // Step 3: Apply all filters
+                    val filteredStudents = nameFiltered.filter { student ->
+                        val studentFees = /*student.feesStatus?.lowercase() ?:*/ ""
+                        val studentTransport = /*student.transportStatus?.lowercase() ?:*/ ""
+                        val studentLibrary = /*student.libraryStatus?.lowercase() ?:*/ ""
+                        val studentPerformance = /*student.performance?.lowercase() ?:*/ ""
+
+                        val feesOk = feesSet.isEmpty() || studentFees in feesSet
+                        val transportOk = transportSet.isEmpty() || studentTransport in transportSet
+                        val libraryOk = librarySet.isEmpty() || studentLibrary in librarySet
+                        val performanceOk = performanceSet.isEmpty() || studentPerformance in performanceSet
+
+                        feesOk && transportOk && libraryOk && performanceOk
+                    }
+
+                    if (filteredStudents.isEmpty()) {
+                        _classAttendanceState.value = ClassAttendanceUiState.Empty
+                        return@collect
+                    }
+
+                    // Step 4: Get attendance records within date range (if specified)
+                    val attendanceRecords = mutableListOf<Attendance>()
+                    if (attendanceStartDate != null && attendanceEndDate != null) {
+                        attendanceRepository.getAttendanceByDateRange(attendanceStartDate, attendanceEndDate)
+                            .catch { e ->
+                                _classAttendanceState.value =
+                                    ClassAttendanceUiState.Error(e.message ?: "Failed to fetch attendance")
+                            }
+                            .collect {
+                                attendanceRecords.addAll(it)
+                            }
+                    }
+
+                    // Step 5: Match attendance records and filter by status
+                    val finalRecords = filteredStudents.mapNotNull { student ->
+                        val attendance = attendanceRecords.find { it.studentId == student.id }
+
+                        val matchesStatus = when (attendanceStatus?.uppercase()) {
+                            "PRESENT" -> attendance?.status == "PRESENT"
+                            "ABSENT" -> attendance?.status == "ABSENT"
+                            else -> true
+                        }
+
+                        if (matchesStatus) {
+                            StudentAttendanceRecord(student, attendance)
+                        } else null
+                    }
+
+                    // Step 6: Emit UI state
+                    _classAttendanceState.value = if (finalRecords.isEmpty()) {
+                        ClassAttendanceUiState.Empty
+                    } else {
+                        ClassAttendanceUiState.Success(
+                            ClassAttendanceData(
+                                date = attendanceStartDate ?: Date(),
+                                classId = classSet.joinToString(),
+                                sectionId = sectionSet.joinToString(),
+                                records = finalRecords
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
 }
 
 // UI state for attendance list

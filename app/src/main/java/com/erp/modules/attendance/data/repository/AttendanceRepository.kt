@@ -73,4 +73,8 @@ class AttendanceRepository(
             if (totalDays > 0) (presentDays.toFloat() / totalDays) * 100 else 0f
         }
     }
+
+    fun getAttendanceByDateRange(startDate: Date, endDate: Date): Flow<List<Attendance>> {
+        return attendanceDao.getAttendanceByDateRange(startDate, endDate)
+    }
 } 

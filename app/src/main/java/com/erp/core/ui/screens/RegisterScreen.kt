@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -47,20 +44,20 @@ import com.erp.components.RoleDropdown
 import com.erp.core.auth.AuthManager
 import com.erp.data.UserRole
 import com.erp.data.userRoles
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * The login screen composable which collects email, password, access ID and role,
- * then executes the sign in logic. The function handles both real sign-in using Firebase
- * authentication and simulated sign in for demo purposes.
+ * Registration Screen composable for new user sign-up.
+ *
+ * @param authManager the authentication manager handling sign up logic.
+ * @param onRegisterSuccess callback when sign-up is successful.
+ * @param onLoginClick callback to navigate back to the login screen.
  */
 @Composable
-fun LoginScreen(
+fun RegisterScreen(
     authManager: AuthManager,
-    onLoginSuccess: (UserRole, String) -> Unit,
-    onRegisterClick: () -> Unit = {},
-    useSimulation: Boolean = false // Toggle simulation vs. real authentication
+    onRegisterSuccess: (UserRole, String) -> Unit,
+    onLoginClick: () -> Unit = {}
 ) {
     var selectedRole by remember { mutableStateOf<UserRole?>(null) }
     var accessId by remember { mutableStateOf("") }
@@ -88,14 +85,14 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Login to your account",
+            text = "Register your account",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Role selection dropdown
+        // Role selection component
         RoleDropdown(
             selectedRole = selectedRole,
             onRoleSelected = { role ->
@@ -110,9 +107,7 @@ fun LoginScreen(
             value = accessId,
             onValueChange = { accessId = it },
             label = { Text("Access ID") },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Email, contentDescription = null)
-            },
+            leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = null) },
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
@@ -124,9 +119,7 @@ fun LoginScreen(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Email, contentDescription = null)
-            },
+            leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = null) },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -141,9 +134,7 @@ fun LoginScreen(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
-            leadingIcon = {
-                Icon(imageVector = Icons.Default.Lock, contentDescription = null)
-            },
+            leadingIcon = { Icon(imageVector = Icons.Default.Lock, contentDescription = null) },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -153,11 +144,11 @@ fun LoginScreen(
             singleLine = true
         )
 
-        // Display an error message if needed
-        errorMessage?.let { message ->
+        // Display error message if available
+        errorMessage?.let { msg ->
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = message,
+                text = msg,
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
@@ -169,7 +160,7 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                // Input validation
+                // Validate inputs
                 if (email.isBlank() || password.isBlank()) {
                     errorMessage = "Email and password cannot be empty"
                     return@Button
@@ -188,25 +179,19 @@ fun LoginScreen(
 
                 coroutineScope.launch {
                     try {
-                        // Use simulation if toggled on; otherwise, perform real authentication.
-                        if (useSimulation) {
-                            delay(1500)
-                            authManager.simulateSignIn()
-                        } else {
-                            // Use the real authentication method
-                            val result = authManager.signInWithEmailAndPassword(email, password)
-                            result.getOrElse {
-                                throw Exception(it.message ?: "Authentication failed")
-                            }
+                        // Attempt to register a new user
+                        val result = authManager.signUpWithEmailAndPassword(email, password)
+                        result.getOrElse {
+                            throw Exception(it.message ?: "Registration failed")
                         }
                         isLoading = false
-                        // On successful login, pass the role and access ID to caller
                         selectedRole?.let { role ->
-                            onLoginSuccess(role, accessId)
+                            // Callback for successful registration with role and access ID.
+                            onRegisterSuccess(role, accessId)
                         }
                     } catch (e: Exception) {
                         isLoading = false
-                        errorMessage = e.message ?: "Authentication failed"
+                        errorMessage = e.message ?: "Registration failed"
                     }
                 }
             },
@@ -222,36 +207,28 @@ fun LoginScreen(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text("Login")
+                Text("Register")
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Optional: A clickable text for registration if needed.
-        TextButton(
-            onClick = { onRegisterClick() },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text(
-                text = "Don't have an account? Register here.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        // Additional sign-in methods can be added below (e.g., Google Sign-In)
+        // Optionally, allow users to go back to login.
+        Text(
+            text = "Already have an account? Login here.",
+            modifier = Modifier.clickable { onLoginClick() },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun LoginPreview() {
-    // For preview purposes we use simulation mode and a dummy AuthManager.
-    LoginScreen(
+fun RegisterScreenPreview() {
+    RegisterScreen(
         authManager = AuthManager(LocalContext.current),
-        onLoginSuccess = { _, _ -> },
-        onRegisterClick = {},
-        useSimulation = true
+        onRegisterSuccess = { _, _ -> },
+        onLoginClick = {}
     )
 }

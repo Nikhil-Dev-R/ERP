@@ -217,7 +217,7 @@ fun ProductsScreen(
         }
         
         if (showRestockDialog) {
-            com.erp.modules.inventory.ui.screens.RestockDialog(
+            RestockDialog(
                 product = selectedProduct,
                 onDismiss = { showRestockDialog = false },
                 onRestock = { productId, quantity ->
@@ -299,14 +299,12 @@ fun ProductItem(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline
                     )
-                    
-                    if (product.category != null) {
-                        Text(
-                            text = product.category.name,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
+
+                    Text(
+                        text = product.category.name,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
                 }
                 
                 Column(horizontalAlignment = Alignment.End) {
@@ -541,7 +539,7 @@ fun ProductEditDialog(
                         expanded = showCategoryDropdown,
                         onDismissRequest = { showCategoryDropdown = false }
                     ) {
-                        ProductCategory.values().forEach { productCategory ->
+                        ProductCategory.entries.forEach { productCategory ->
                             DropdownMenuItem(
                                 text = { Text(productCategory.name) },
                                 onClick = {
@@ -573,7 +571,7 @@ fun ProductEditDialog(
                         expanded = showStatusDropdown,
                         onDismissRequest = { showStatusDropdown = false }
                     ) {
-                        ProductStatus.values().forEach { productStatus ->
+                        ProductStatus.entries.forEach { productStatus ->
                             DropdownMenuItem(
                                 text = { Text(productStatus.name) },
                                 onClick = {

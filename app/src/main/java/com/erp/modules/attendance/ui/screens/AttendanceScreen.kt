@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,45 +22,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.erp.components.ERPTopBar
+import com.erp.components.FilterScreen
 import com.erp.modules.attendance.ui.viewmodel.AttendanceViewModel
 import com.erp.modules.student.data.model.Student
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-    fun AttendanceScreen(
+fun AttendanceScreen(
     viewModel: AttendanceViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
-    var tabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Daily Attendance", "Reports", "Student Records")
     val currentDate = remember { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date()) }
     var selectedClass by remember { mutableStateOf("All Classes") }
     val classOptions = listOf("All Classes", "Grade 9-A", "Grade 9-B", "Grade 10-A", "Grade 10-B")
     var showClassDropdown by remember { mutableStateOf(false) }
+    val pagerState = rememberPagerState { tabs.size }
+    var showFilters by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Attendance Management") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
+            ERPTopBar(
+                title = "Attendance Management",
+                onNavIconClick = { navController.navigateUp() },
                 actions = {
                     IconButton(onClick = { /* Open search */ }) {
                         Icon(Icons.Default.Search, contentDescription = "Search")
                     }
-                    IconButton(onClick = { /* Open filter */ }) {
+                    IconButton(onClick = {
+                        showFilters = !showFilters
+                    }) {
                         Icon(Icons.Default.FilterList, contentDescription = "Filter")
                     }
                 }
             )
         },
         floatingActionButton = {
-            if (tabIndex == 0) {
+            if (!showFilters) {
                 FloatingActionButton(
                     onClick = { /* Take attendance action */ }
                 ) {
@@ -72,66 +77,36 @@ import java.util.*
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            TabRow(selectedTabIndex = tabIndex) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = tabIndex == index,
-                        onClick = { tabIndex = index },
-                        text = { Text(title) }
-                    )
-                }
-            }
-            
-            // Date and Class Selection Row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Date display
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.CalendarToday, contentDescription = null, 
-                        modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(currentDate, style = MaterialTheme.typography.bodyMedium)
-                }
-                
-                // Class selection dropdown
-                Box {
-                    OutlinedButton(
-                        onClick = { showClassDropdown = true },
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-                    ) {
-                        Text(selectedClass)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                    }
-                    
-                    DropdownMenu(
-                        expanded = showClassDropdown,
-                        onDismissRequest = { showClassDropdown = false },
-                        modifier = Modifier.width(200.dp)
-                    ) {
-                        classOptions.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(option) },
-                                onClick = {
-                                    selectedClass = option
-                                    showClassDropdown = false
-                                }
-                            )
-                        }
+            if (showFilters) {
+                FilterScreen(
+                    modifier = Modifier.clickable{
+                        showFilters = false
+                    },
+                    onApplyFilters = viewModel::applyFilters
+                )
+            } else {
+                ScrollableTabRow(selectedTabIndex = pagerState.currentPage) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick = {
+                                scope.launch { pagerState.animateScrollToPage(index) }
+                            },
+                            text = { Text(title) }
+                        )
                     }
                 }
-            }
-            
-            // Content based on selected tab
-            when (tabIndex) {
-                0 -> DailyAttendanceTab(viewModel)
-                1 -> AttendanceReportsTab(viewModel)
-                2 -> StudentRecordsTab(viewModel)
+
+                // Content based on selected tab
+                HorizontalPager(
+                    state = pagerState,
+                ) { page ->
+                    when (page) {
+                        0 -> DailyAttendanceTab(viewModel)
+                        1 -> AttendanceReportsTab(viewModel)
+                        2 -> StudentRecordsTab(viewModel)
+                    }
+                }
             }
         }
     }

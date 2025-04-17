@@ -16,12 +16,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.erp.components.ERPTopBar
 import com.erp.data.UserRole
 import com.erp.modules.student.data.model.Student
 import com.erp.modules.student.ui.viewmodel.StudentDetailUiState
@@ -35,52 +37,47 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudentDetailScreen(
-//    viewModel: StudentViewModel,
     studentDetailUiStateFlow: StateFlow<StudentDetailUiState>,
     role: UserRole,
-    studentId: String? = null,
+    isHome: Boolean = false,
     deleteStudent: (Student) -> Unit = {},
     onNavigateBack: () -> Unit = {},
-    onNavigateToEdit: (String?) -> Unit = {}
+    onNavigateToEdit: () -> Unit = {}
 ) {
     val studentDetailState by studentDetailUiStateFlow.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Student Detail") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
-                    }
-                },
+            ERPTopBar(
+                title = "Student Detail",
+                navIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                onNavIconClick = onNavigateBack,
+                centerAligned = isHome,
                 actions = {
                     if (role == UserRole.Admin || role == UserRole.Teacher) {
-                        if (studentId != null) {
-                            // Edit button
-                            IconButton(onClick = { onNavigateToEdit(studentId) }) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit Student"
-                                )
-                            }
-
-                            // Delete button
-                            IconButton(onClick = { showDeleteDialog = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete Student"
-                                )
-                            }
+                        // Delete button
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete Student",
+                                tint = MaterialTheme.colorScheme.error
+                            )
                         }
                     }
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            if (role == UserRole.Admin || role == UserRole.Teacher) {
+                FloatingActionButton(onClick = { onNavigateToEdit() }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Student"
+                    )
+                }
+            }
+        },
     ) { paddingValues ->
         when (val state = studentDetailState) {
             is StudentDetailUiState.Loading -> {
@@ -196,8 +193,7 @@ fun StudentDetailContent(
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.secondary
         )
-        
-        // Class Information
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -218,151 +214,51 @@ fun StudentDetailContent(
         }
         
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Student Details
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                SectionTitle(title = "Personal Information")
-
-                InfoRow(
-                    icon = Icons.Default.Cake,
-                    label = "Date of Birth",
-                    value = student.dateOfBirth?.let { formatDate(it) } ?: "Not provided"
-                )
-
-                InfoRow(
-                    icon = Icons.Default.Wc,
-                    label = "Gender",
-                    value = student.gender
-                )
-
-                InfoRow(
-                    icon = Icons.Default.Bloodtype,
-                    label = "Blood Group",
-                    value = student.bloodGroup
-                )
-
-                InfoRow(
-                    icon = Icons.Default.Home,
-                    label = "Address",
-                    value = student.address
-                )
-            }
-        }
+        InfoCard(
+            title = "Personal Information",
+            infoRows = listOf(
+                Triple(Icons.Default.Cake, "Date of Birth", student.dateOfBirth?.let { formatDate(it) } ?: "Not provided"),
+                Triple(Icons.Default.Wc, "Gender", student.gender),
+                Triple(Icons.Default.Bloodtype, "Blood Group", student.bloodGroup),
+                Triple(Icons.Default.Home, "Address", student.address)
+            )
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                SectionTitle(title = "Contact Information")
-
-                InfoRow(
-                    icon = Icons.Default.Call,
-                    label = "Phone",
-                    value = student.contactNumber
-                )
-
-                InfoRow(
-                    icon = Icons.Default.Email,
-                    label = "Email",
-                    value = student.email
-                )
-
-                InfoRow(
-                    icon = Icons.Default.MedicalServices,
-                    label = "Emergency Contact",
-                    value = student.emergencyContact
-                )
-            }
-        }
+        InfoCard(
+            title = "Contact Information",
+            infoRows = listOf(
+                Triple(Icons.Default.Phone, "Phone", student.contactNumber),
+                Triple(Icons.Default.Email, "Email", student.email),
+                Triple(Icons.Default.MedicalServices, "Emergency Contact", student.emergencyContact)
+            )
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Student Details
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                SectionTitle(title = "Parent Information")
+        InfoCard(
+            title = "Parent Information",
+            infoRows = listOf(
+                Triple(Icons.Default.Person, "Parent Name", student.parentName),
+                Triple(Icons.Default.Call, "Parent Contact", student.parentContact),
+                Triple(Icons.Default.Email, "Parent Email", student.parentEmail)
+            )
+        )
 
-                InfoRow(
-                    icon = Icons.Default.Person,
-                    label = "Parent Name",
-                    value = student.parentName
-                )
+        Spacer(modifier = Modifier.height(12.dp))
 
-                InfoRow(
-                    icon = Icons.Default.Call,
-                    label = "Parent Contact",
-                    value = student.parentContact
-                )
-
-                InfoRow(
-                    icon = Icons.Default.Email,
-                    label = "Parent Email",
-                    value = student.parentEmail
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-            }
-        }
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                SectionTitle(title = "Academic Information")
-                
-                InfoRow(
-                    icon = Icons.Default.DateRange,
-                    label = "Admission Date",
-                    value = student.admissionDate?.let { formatDate(it) } ?: "Not provided"
-                )
-                
-                InfoRow(
-                    icon = Icons.Default.School,
-                    label = "Previous School",
-                    value = student.previousSchool
-                )
-                
-                InfoRow(
-                    icon = Icons.Default.HealthAndSafety,
-                    label = "Health Notes",
-                    value = student.healthNotes
-                )
-                
-                InfoRow(
-                    icon = if (student.active) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                    label = "Status",
-                    value = if (student.active) "Active" else "Inactive"
-                )
-            }
-        }
+        InfoCard(
+            title = "Academic Information",
+            infoRows = listOf(
+                Triple(Icons.Default.DateRange, "Admission Date", student.admissionDate?.let { formatDate(it) } ?: "Not provided"),
+                Triple(Icons.Default.School, "Previous School", student.previousSchool),
+                Triple(Icons.Default.HealthAndSafety, "Health Notes", student.healthNotes),
+                Triple(Icons.Default.CheckCircle, "Status", if (student.active) "Active" else "Inactive")
+            )
+        )
     }
 }
 
@@ -378,7 +274,7 @@ fun SectionTitle(title: String) {
 
 @Composable
 fun InfoRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     value: String
 ) {
@@ -417,11 +313,12 @@ fun InfoRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InfoChip(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit = {}
 ) {
     SuggestionChip(
-        onClick = { },
+        onClick = onClick,
         label = { Text(text = label) },
         icon = {
             Icon(
@@ -431,6 +328,29 @@ fun InfoChip(
             )
         }
     )
+}
+
+@Composable
+fun InfoCard(
+    title: String,
+    infoRows: List<Triple<ImageVector, String, String>>
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            SectionTitle(title = title)
+
+            infoRows.forEach {
+                InfoRow(icon = it.first, label = it.second, value = it.third)
+            }
+        }
+    }
 }
 
 // Helper function to format dates

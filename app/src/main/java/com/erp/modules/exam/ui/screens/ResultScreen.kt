@@ -127,7 +127,7 @@ fun ExamSelectionDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor()
+//                .menuAnchor()
         )
         
         ExposedDropdownMenu(
@@ -177,7 +177,7 @@ fun ExamDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor()
+//                .menuAnchor()
         )
         
         ExposedDropdownMenu(
