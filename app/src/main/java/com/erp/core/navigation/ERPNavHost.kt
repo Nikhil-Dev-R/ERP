@@ -485,11 +485,10 @@ fun ERPNavHost(
                 observeAllStudentsState = viewModel.studentViewModel.allStudents,
                 observeStudentSuggestionsState = viewModel.studentViewModel.studentSuggestions,
                 searchStudents = viewModel.studentViewModel::searchStudents,
+                loadAllStudents = viewModel.studentViewModel::loadAllStudents,
                 onNavigateToStudentDetail = { studentId ->
-                    if (studentId == null) {
-                        navController.navigate(ERPDestinations.STUDENT_DETAIL_ROUTE)
-                    } else {
-                        navController.navigate("${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$studentId")
+                    studentId?.let {
+                        navController.navigate("${ERPDestinations.STUDENT_DETAIL_ROUTE}?studentId=$it")
                     }
                 },
                 onFabClick = {

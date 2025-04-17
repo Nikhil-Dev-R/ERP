@@ -99,13 +99,14 @@ fun StudentForm(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 // First Name
                 OutlinedTextField(
                     value = student.firstName,
                     onValueChange = { onStudentChange(student.copy(firstName = it)) },
                     label = { Text("First Name") },
+                    singleLine = true,
                     modifier = Modifier.weight(1f),
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                     keyboardOptions = KeyboardOptions(
@@ -119,6 +120,7 @@ fun StudentForm(
                     value = student.lastName,
                     onValueChange = { onStudentChange(student.copy(lastName = it)) },
                     label = { Text("Last Name") },
+                    singleLine = true,
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
@@ -134,6 +136,7 @@ fun StudentForm(
                 value = student.enrollmentNumber,
                 onValueChange = { onStudentChange(student.copy(enrollmentNumber = it)) },
                 label = { Text("Enrollment/Registration Number") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -163,6 +166,7 @@ fun StudentForm(
                 value = student.bloodGroup,
                 onValueChange = { onStudentChange(student.copy(bloodGroup = it)) },
                 label = { Text("Blood Group") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Bloodtype, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(
@@ -180,13 +184,14 @@ fun StudentForm(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 // Grade/Class
                 OutlinedTextField(
                     value = student.grade,
                     onValueChange = { onStudentChange(student.copy(grade = it)) },
                     label = { Text("Grade/Class") },
+                    singleLine = true,
                     modifier = Modifier.weight(1f),
                     leadingIcon = { Icon(Icons.Default.Class, contentDescription = null) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
@@ -197,6 +202,7 @@ fun StudentForm(
                     value = student.section,
                     onValueChange = { onStudentChange(student.copy(section = it)) },
                     label = { Text("Section") },
+                    singleLine = true,
                     modifier = Modifier.weight(1f),
                     leadingIcon = { Icon(Icons.Default.Groups, contentDescription = null) },
                     keyboardOptions = KeyboardOptions(
@@ -222,6 +228,7 @@ fun StudentForm(
                 value = student.previousSchool,
                 onValueChange = { onStudentChange(student.copy(previousSchool = it)) },
                 label = { Text("Previous School") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.School, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(
@@ -242,6 +249,7 @@ fun StudentForm(
                 value = student.contactNumber,
                 onValueChange = { onStudentChange(student.copy(contactNumber = it)) },
                 label = { Text("Contact Number") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Call, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(
@@ -257,6 +265,7 @@ fun StudentForm(
                 value = student.email,
                 onValueChange = { onStudentChange(student.copy(email = it)) },
                 label = { Text("Email") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(
@@ -307,6 +316,7 @@ fun StudentForm(
                 value = student.parentName,
                 onValueChange = { onStudentChange(student.copy(parentName = it)) },
                 label = { Text("Parent Name") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(
@@ -322,6 +332,7 @@ fun StudentForm(
                 value = student.parentContact,
                 onValueChange = { onStudentChange(student.copy(parentContact = it)) },
                 label = { Text("Parent Contact") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Call, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(
@@ -337,6 +348,7 @@ fun StudentForm(
                 value = student.parentEmail,
                 onValueChange = { onStudentChange(student.copy(parentEmail = it)) },
                 label = { Text("Parent Email") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                 keyboardOptions = KeyboardOptions(

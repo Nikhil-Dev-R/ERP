@@ -1,6 +1,5 @@
 package com.erp.components
 
-import android.media.Image
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,7 +31,7 @@ fun ERPTopBar(
             title = {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineLarge
+                    style = MaterialTheme.typography.headlineMedium
                 )
             },
             actions = actions,
@@ -43,7 +42,7 @@ fun ERPTopBar(
             title = {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineLarge
+                    style = MaterialTheme.typography.headlineMedium
                 )
             },
             navigationIcon = {

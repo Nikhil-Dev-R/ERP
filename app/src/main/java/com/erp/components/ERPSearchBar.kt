@@ -39,7 +39,10 @@ fun ERPSearchBar(
     onExpandedChange: (Boolean) -> Unit = {},
     enabled: Boolean = true
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier.fillMaxWidth()
+        .padding(horizontal = 16.dp)
+    ) {
         OutlinedTextField(
             value = query,
             onValueChange = {
@@ -47,7 +50,6 @@ fun ERPSearchBar(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
                 .clip(
                     shape = MaterialTheme.shapes.extraLarge
                 ),

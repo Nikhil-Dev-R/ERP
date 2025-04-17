@@ -37,4 +37,7 @@ interface AttendanceDao : BaseDao<Attendance> {
 
     @Query("SELECT COUNT(*) FROM attendance WHERE studentId = :studentId AND status = 'ABSENT'")
     fun countAbsentDaysForStudent(studentId: String): Flow<Int>
+
+    @Query("SELECT * FROM attendance WHERE date BETWEEN :startDate AND :endDate")
+    fun getAttendanceByDateRange(startDate: Date, endDate: Date): Flow<List<Attendance>>
 } 

@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,7 @@ import kotlinx.coroutines.flow.asStateFlow
 fun StudentsScreen(
     observeAllStudentsState: StateFlow<StudentsUiState>,
     observeStudentSuggestionsState: StateFlow<List<Student>>,
+    loadAllStudents: () -> Unit,
     searchStudents: (query: String) -> Unit,
     onNavigateToStudentDetail: (studentId: String?) -> Unit,
     onFabClick: () -> Unit,
@@ -65,6 +67,10 @@ fun StudentsScreen(
     val studentSuggestions by observeStudentSuggestionsState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        loadAllStudents()
+    }
 
     Scaffold(
         topBar = {
@@ -78,7 +84,6 @@ fun StudentsScreen(
                 Icon(Icons.Default.Add, contentDescription = "Add Student")
             }
         },
-        floatingActionButtonPosition = FabPosition.EndOverlay
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -247,6 +252,7 @@ fun SSPreview() {
             listOf(Student(), Student())
         ).asStateFlow(),
         searchStudents = {},
+        loadAllStudents = {},
         onNavigateToStudentDetail = {},
         onNavigateBack = {},
         onFabClick = {}

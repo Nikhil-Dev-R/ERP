@@ -162,6 +162,7 @@ class StudentViewModel(
                 // Handle error
             }
         }
+        Log.d(TAG, "Closing Deletion student with ID: ${student.id}")
     }
 }
 
